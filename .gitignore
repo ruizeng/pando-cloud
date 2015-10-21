@@ -22,3 +22,10 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+# ctag files
+.tags*
+
+# Test data folder
+testdata
+
