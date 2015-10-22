@@ -72,7 +72,7 @@ func TestServer(t *testing.T) {
 		}
 	}()
 
-	time.Sleep(time.Millisecond * 100)
+	time.Sleep(time.Second)
 
 	validateHTTPSServer(t, "https://"+*confHTTPHost)
 	validateTLSServer(t, *confTCPHost)
