@@ -82,9 +82,9 @@ func fixHostIp(addr string) (string, error) {
 		} else {
 			return addr, errors.New("server has no internal ip")
 		}
-	} else if strings.Contains(addr, confInternalIP) {
+	} else if strings.Contains(addr, confExternalIP) {
 		if ExternalIP != "" {
-			addr = strings.Replace(addr, confInternalIP, ExternalIP, -1)
+			addr = strings.Replace(addr, confExternalIP, ExternalIP, -1)
 		} else {
 			return addr, errors.New("server has no external ip")
 		}

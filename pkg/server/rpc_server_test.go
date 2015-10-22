@@ -3,7 +3,14 @@ package server
 import (
 	"net/rpc"
 	"testing"
+	"time"
 )
+
+const (
+	testRPCHost = "localhost:12346"
+)
+
+var testRPCArgs = &Args{100, 200}
 
 type Args struct {
 	A, B int
@@ -16,11 +23,27 @@ func (t *Arith) Multiply(args *Args, reply *int) error {
 	return nil
 }
 
+func validateRPCServer(t *testing.T, addr string, method string) {
+	rpccli, err := rpc.Dial("tcp", addr)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var reply int
+
+	err = rpccli.Call(method, testRPCArgs, &reply)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if reply != testRPCArgs.A*testRPCArgs.B {
+		t.Fatalf("rpc test faild, want %d, got %d", testRPCArgs.A*testRPCArgs.B, reply)
+	}
+}
+
 func TestRPCServer(t *testing.T) {
 	initLog("test", "debug")
 
-	testAddr := "localhost:12346"
-	testArgs := &Args{100, 200}
 	testRPC := new(Arith)
 
 	err := rpc.Register(testRPC)
@@ -32,7 +55,7 @@ func TestRPCServer(t *testing.T) {
 
 	svr := &RPCServer{
 		TCPServer{
-			addr:    testAddr,
+			addr:    testRPCHost,
 			handler: &handler,
 			useTls:  false,
 		},
@@ -43,20 +66,7 @@ func TestRPCServer(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	rpccli, err := rpc.Dial("tcp", testAddr)
-	if err != nil {
-		t.Fatal(err)
-	}
+	time.Sleep(time.Millisecond * 100)
 
-	var reply int
-
-	err = rpccli.Call("Arith.Multiply", testArgs, &reply)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if reply != testArgs.A*testArgs.B {
-		t.Fatalf("rpc test faild, want %d, got %d", testArgs.A*testArgs.B, reply)
-	}
-
+	validateRPCServer(t, testRPCHost, "Arith.Multiply")
 }

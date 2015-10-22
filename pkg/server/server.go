@@ -7,7 +7,6 @@
 package server
 
 import (
-	"fmt"
 	"github.com/vharitonsky/iniflags"
 	"net/http"
 	"net/rpc"
@@ -109,7 +108,7 @@ func RegisterHTTPHandler(handler http.Handler) error {
 }
 
 // register RPC handler class
-func RegisterRPCService(rcvr interface{}) error {
+func RegisterRPCHandler(rcvr interface{}) error {
 	if serverInstance == nil {
 		return errorf(errServerNotInit)
 	}
@@ -167,7 +166,6 @@ func Run() error {
 	}
 
 	if serverInstance.httpsvr != nil {
-		fmt.Println("serverInstance.httpsvr")
 		err := serverInstance.httpsvr.Start()
 		if err != nil {
 			return err
@@ -176,7 +174,6 @@ func Run() error {
 	}
 
 	if serverInstance.rpcsvr != nil {
-		fmt.Println("serverInstance.rpcsvr \n")
 		err := serverInstance.rpcsvr.Start()
 		if err != nil {
 			return err
