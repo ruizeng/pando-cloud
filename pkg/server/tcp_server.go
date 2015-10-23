@@ -28,10 +28,10 @@ func (ts *TCPServer) Start() error {
 	if ts.useTls {
 		// if use tls, then load pem files and start server
 		if *confCAFile == "" {
-			return errorf(errMissingFlag, flagCAFile)
+			return errorf(errMissingFlag, FlagCAFile)
 		}
 		if *confKeyFile == "" {
-			return errorf(errMissingFlag, flagKeyFile)
+			return errorf(errMissingFlag, FlagKeyFile)
 		}
 
 		// process key files

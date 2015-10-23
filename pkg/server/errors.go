@@ -10,4 +10,5 @@ const (
 	errListenFailed            = "FATAL: tcp listen (%s) failed - %s"
 	errNewConnection           = "receive new connection error (%s)"
 	errWrongHostAddr           = "wrong address : %s"
+	errWrongEtcdPath           = "wrong path in etcd: %s"
 )

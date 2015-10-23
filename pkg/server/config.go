@@ -7,30 +7,30 @@ import (
 )
 
 const (
-	flagTCPHost  = "tcphost"
-	flagUseTls   = "usetls"
-	flagHTTPHost = "httphost"
-	flagUseHttps = "usehttps"
-	flagCAFile   = "cafile"
-	flagKeyFile  = "keyfile"
-	flagRPCHost  = "rpchost"
-	flagEtcd     = "etcd"
-	flagLogLevel = "loglevel"
+	FlagTCPHost  = "tcphost"
+	FlagUseTls   = "usetls"
+	FlagHTTPHost = "httphost"
+	FlagUseHttps = "usehttps"
+	FlagCAFile   = "cafile"
+	FlagKeyFile  = "keyfile"
+	FlagRPCHost  = "rpchost"
+	FlagEtcd     = "etcd"
+	FlagLogLevel = "loglevel"
 )
 
 var (
-	confTCPHost = flag.String(flagTCPHost, "", "tcp server listen address, format ip:port")
-	confUseTls  = flag.Bool(flagUseTls, false, "if tcp server uses tls, default false")
+	confTCPHost = flag.String(FlagTCPHost, "", "tcp server listen address, format ip:port")
+	confUseTls  = flag.Bool(FlagUseTls, false, "if tcp server uses tls, default false")
 
-	confHTTPHost = flag.String(flagHTTPHost, "", "http server listen address, format ip:port")
-	confUseHttps = flag.Bool(flagUseHttps, false, "if http server uses tls, default false")
+	confHTTPHost = flag.String(FlagHTTPHost, "", "http server listen address, format ip:port")
+	confUseHttps = flag.Bool(FlagUseHttps, false, "if http server uses tls, default false")
 
-	confCAFile  = flag.String(flagCAFile, "cacert.pem", "public ca pem file path")
-	confKeyFile = flag.String(flagKeyFile, "privkey.pem", "private key pem file path")
+	confCAFile  = flag.String(FlagCAFile, "cacert.pem", "public ca pem file path")
+	confKeyFile = flag.String(FlagKeyFile, "privkey.pem", "private key pem file path")
 
-	confRPCHost = flag.String(flagRPCHost, "", "rpc server listen address, format ip:port")
+	confRPCHost = flag.String(FlagRPCHost, "", "rpc server listen address, format ip:port")
 
-	confEtcd = flag.String(flagEtcd, "", "etcd service addr, format ip:port;ip:port")
+	confEtcd = flag.String(FlagEtcd, "", "etcd service addr, format ip:port;ip:port")
 
-	confLogLevel = flag.String(flagLogLevel, "warn", "default log level, options are panic|fatal|error|warn|info|debug")
+	confLogLevel = flag.String(FlagLogLevel, "warn", "default log level, options are panic|fatal|error|warn|info|debug")
 )

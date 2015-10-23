@@ -1,6 +1,7 @@
 package server
 
 import (
+	"reflect"
 	"testing"
 	"time"
 )
@@ -18,12 +19,23 @@ func (t *testTimer) DoTask() {
 	Log.Info("timer task fires.")
 }
 
-func TestServer(t *testing.T) {
-	err := Init("simpletest")
+func validateGetServerHosts(t *testing.T, flag string, want string) {
+	hosts, err := serverInstance.svrmgr.GetServerHosts("test", flag)
 	if err != nil {
 		t.Error(err)
 	}
+	if !reflect.DeepEqual(hosts, []string{want}) {
+		t.Errorf("error get server hosts, want: %v, got %v", []string{want}, hosts)
+	}
+}
 
+func validateServerManager(t *testing.T) {
+	validateGetServerHosts(t, FlagTCPHost, *confTCPHost)
+	validateGetServerHosts(t, FlagRPCHost, *confRPCHost)
+	validateGetServerHosts(t, FlagHTTPHost, *confHTTPHost)
+}
+
+func TestServer(t *testing.T) {
 	*confHTTPHost = "localhost:59000"
 	*confTCPHost = "localhost:59001"
 	*confRPCHost = "localhost:59002"
@@ -31,8 +43,9 @@ func TestServer(t *testing.T) {
 	*confUseTls = true
 	*confCAFile = "testdata/cert.pem"
 	*confKeyFile = "testdata/key.pem"
+	*confEtcd = "http://localhost:2379"
 
-	err = Init("test")
+	err := Init("test")
 	if err != nil {
 		t.Fatalf("%s", err)
 	}
@@ -77,4 +90,5 @@ func TestServer(t *testing.T) {
 	validateHTTPSServer(t, "https://"+*confHTTPHost)
 	validateTLSServer(t, *confTCPHost)
 	validateRPCServer(t, *confRPCHost, "Arith2.Multiply")
+	validateServerManager(t)
 }

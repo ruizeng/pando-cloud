@@ -24,11 +24,11 @@ func (hs *HTTPServer) Start() error {
 		} else {
 			// secure files
 			if *confCAFile == "" {
-				errorf(errMissingFlag, flagCAFile)
+				errorf(errMissingFlag, FlagCAFile)
 				return
 			}
 			if *confKeyFile == "" {
-				errorf(errMissingFlag, flagKeyFile)
+				errorf(errMissingFlag, FlagKeyFile)
 				return
 			}
 			err := http.ListenAndServeTLS(hs.addr, *confCAFile, *confKeyFile, hs.handler)

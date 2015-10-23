@@ -26,7 +26,7 @@ type Server struct {
 	httpsvr   *HTTPServer // HTTP server
 	timertask TimerTask   // timer task
 	// functions
-	// svcmgr *ServiceManager // service registration&discovery manager
+	svrmgr *ServerManager // service registration&discovery manager
 }
 
 // init the server with specific name.
@@ -39,7 +39,10 @@ func Init(name string) error {
 		readNetInterfaces()
 
 		// log
-		initLog(name, *confLogLevel)
+		err := initLog(name, *confLogLevel)
+		if err != nil {
+			return err
+		}
 
 		// server instance
 		serverInstance = &Server{
@@ -47,13 +50,12 @@ func Init(name string) error {
 		}
 
 		// init service manager
-		/*
-			serverInstance.svcmgr, err = NewServiceManager(name)
-			if err != nil {
-				return err
-			}
-			fmt.Printf("service manager init! \n")
-		*/
+		serverInstance.svrmgr, err = NewServerManager(name, *confEtcd)
+		if err != nil {
+			return err
+		}
+
+		Log.Infof("server %s init success.", name)
 
 	}
 	return nil
@@ -66,7 +68,7 @@ func RegisterTCPHandler(handler TCPHandler) error {
 	}
 	if serverInstance.tcpsvr == nil {
 		if *confTCPHost == "" {
-			return errorf(errMissingFlag, flagTCPHost)
+			return errorf(errMissingFlag, FlagTCPHost)
 		}
 
 		addr, err := fixHostIp(*confTCPHost)
@@ -90,12 +92,12 @@ func RegisterHTTPHandler(handler http.Handler) error {
 	}
 	if serverInstance.httpsvr == nil {
 		if *confHTTPHost == "" {
-			return errorf(errMissingFlag, flagHTTPHost)
+			return errorf(errMissingFlag, FlagHTTPHost)
 		}
 
 		addr, err := fixHostIp(*confHTTPHost)
 		if err != nil {
-			return errorf(errWrongHostAddr, flagHTTPHost)
+			return errorf(errWrongHostAddr, FlagHTTPHost)
 		}
 
 		serverInstance.httpsvr = &HTTPServer{
@@ -114,7 +116,7 @@ func RegisterRPCHandler(rcvr interface{}) error {
 	}
 	if serverInstance.rpcsvr == nil {
 		if *confRPCHost == "" {
-			return errorf(errMissingFlag, flagRPCHost)
+			return errorf(errMissingFlag, FlagRPCHost)
 		}
 
 		addr, err := fixHostIp(*confRPCHost)
@@ -185,21 +187,19 @@ func Run() error {
 
 	// loop to do something
 	for {
-		// master update
-		/*
-			err := serverInstance.svcmgr.RegisterServer()
-			if err != nil {
-				Log.Error("RegisterServer error: %s", err)
-			} else {
-				Log.Info("RegisterServer Success")
-			}
-			err = serverInstance.svcmgr.UpdateServerHosts()
-			if err != nil {
-				Log.Error("UpdateServerHosts error: %s", err)
-			} else {
-				Log.Info("UpdateServerHosts Success")
-			}
-		*/
+		// server manager update
+		err := serverInstance.svrmgr.RegisterServer()
+		if err != nil {
+			Log.Warnf("RegisterServer error: %s", err)
+		} else {
+			Log.Info("RegisterServer Success")
+		}
+		err = serverInstance.svrmgr.UpdateServerHosts()
+		if err != nil {
+			Log.Error("UpdateServerHosts error: %s", err)
+		} else {
+			Log.Info("UpdateServerHosts Success")
+		}
 
 		//timer task
 		if serverInstance.timertask != nil {
