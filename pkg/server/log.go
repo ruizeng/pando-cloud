@@ -4,7 +4,6 @@ package server
 
 import (
 	"github.com/Sirupsen/logrus"
-	"os"
 )
 
 var Log *logrus.Entry
@@ -15,7 +14,7 @@ func initLog(name string, level string) error {
 		logrus.SetFormatter(&logrus.JSONFormatter{})
 
 		// Output to stderr instead of stdout, could also be a file.
-		logrus.SetOutput(os.Stderr)
+		// logrus.SetOutput(os.Stderr)
 
 		// logging level
 		lvl, err := logrus.ParseLevel(level)

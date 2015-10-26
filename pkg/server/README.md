@@ -2,6 +2,6 @@
 includes:
 
 - tcp/http service framework
-- rpc framework with ratelimit and metrics
+- rpc helper
 - stats api
 - timer task interface

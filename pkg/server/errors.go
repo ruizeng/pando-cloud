@@ -11,4 +11,5 @@ const (
 	errNewConnection           = "receive new connection error (%s)"
 	errWrongHostAddr           = "wrong address : %s"
 	errWrongEtcdPath           = "wrong path in etcd: %s"
+	errServerManagerNotInit    = "sever manager not init!"
 )

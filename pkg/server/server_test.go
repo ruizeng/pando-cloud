@@ -90,5 +90,6 @@ func TestServer(t *testing.T) {
 	validateHTTPSServer(t, "https://"+*confHTTPHost)
 	validateTLSServer(t, *confTCPHost)
 	validateRPCServer(t, *confRPCHost, "Arith2.Multiply")
+	validateRPCClient(t)
 	validateServerManager(t)
 }
