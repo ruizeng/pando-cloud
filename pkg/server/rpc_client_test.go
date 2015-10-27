@@ -22,6 +22,15 @@ func validateRPCClient(t *testing.T) {
 		t.Fatalf("rpc client test faild, want %d, got %d", testRPCArgs.A*testRPCArgs.B, reply)
 	}
 
+	err = RPCCallByName("test", "Arith.Multiply", args, &reply)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if reply != testRPCArgs.A*testRPCArgs.B {
+		t.Fatalf("rpc client test faild, want %d, got %d", testRPCArgs.A*testRPCArgs.B, reply)
+	}
+
 	err = rpccli.Call("wrongtest", "Arith.Multiply", args, &reply)
 	t.Log(err)
 	if err == nil {

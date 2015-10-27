@@ -27,6 +27,7 @@ type Server struct {
 	timertask TimerTask   // timer task
 	// functions
 	svrmgr *ServerManager // service registration&discovery manager
+	rpccli *RPCClient     // rpc client
 }
 
 // init the server with specific name.
@@ -51,6 +52,12 @@ func Init(name string) error {
 
 		// init service manager
 		serverInstance.svrmgr, err = NewServerManager(name, *confEtcd)
+		if err != nil {
+			return err
+		}
+
+		// create RPC client
+		serverInstance.rpccli, err = NewRPCClient()
 		if err != nil {
 			return err
 		}
@@ -142,7 +149,7 @@ func RegisterRPCHandler(rcvr interface{}) error {
 	return nil
 }
 
-//register timer task
+// register timer task
 func RegisterTimerTask(task TimerTask) error {
 	if serverInstance == nil {
 		return errorf(errServerNotInit)
@@ -151,6 +158,15 @@ func RegisterTimerTask(task TimerTask) error {
 		serverInstance.timertask = task
 	}
 	return nil
+}
+
+// rpc call by name
+func RPCCallByName(serverName string, serverMethod string, args interface{}, reply interface{}) error {
+	if serverInstance == nil {
+		return errorf(errServerNotInit)
+	}
+
+	return serverInstance.rpccli.Call(serverName, serverMethod, args, reply)
 }
 
 // start service
