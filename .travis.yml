@@ -8,5 +8,6 @@ before_install:
 before_script:
   - $HOME/gopath/bin/etcd &
 script:
+  - cd $HOME/gopath/src/github.com/PandoCloud/pando-cloud/
   - sh ./runtest.bash
   - $HOME/gopath/bin/goveralls -coverprofile=gover.coverprofile -service=travis-ci
