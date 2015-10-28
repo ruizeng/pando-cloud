@@ -5,7 +5,7 @@ import (
 )
 
 func TestMigrate(t *testing.T) {
-	err := MigrateDatabase("localhost", "3306", "PandoCloud", "root", "")
+	err := MigrateDatabase("localhost", "3306", "", "root", "")
 	if err != nil {
 		t.Error(err)
 	}
