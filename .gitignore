@@ -29,3 +29,6 @@ _testmain.go
 
 # Test data output folder
 testoutput
+
+# coverage
+*.coverprofile
