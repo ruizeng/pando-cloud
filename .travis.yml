@@ -9,5 +9,5 @@ before_script:
   - $HOME/gopath/bin/etcd &
 script:
   - cd $HOME/gopath/src/github.com/PandoCloud/pando-cloud/
-  - sh ./runtest.bash
+  - bash ./runtest.bash
   - $HOME/gopath/bin/goveralls -coverprofile=gover.coverprofile -service=travis-ci
