@@ -9,5 +9,6 @@ import (
 type Registry struct{}
 
 func (r *Registry) ValidateProduct(key string, reply *models.Product) error {
+
 	return nil
 }
