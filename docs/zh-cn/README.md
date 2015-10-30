@@ -30,7 +30,7 @@ Pando的目的是为了提供一套可应用于实际生产环境的的物联网
 
 ## 框架概述
 
-![architecture](docs/img/architecture.jpeg)
+![architecture](../img/architecture.jpeg)
 
 框架采用三层架构。
 
