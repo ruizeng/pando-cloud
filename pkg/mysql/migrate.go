@@ -25,9 +25,10 @@ func MigrateDatabase(dbhost, dbport, dbname, dbuser, dbpass string) error {
 
 	// Disable table name's pluralization
 	db.SingularTable(true)
-	db.LogMode(true)
+	db.LogMode(false)
 
-	db.DB().Query("CREATE DATABASE PandoCloud")
+	db.DB().Query("CREATE DATABASE PandoCloud; ")
+	db.DB().Query("USE PandoCloud;")
 	// Automating Migration
 	db.Set("gorm:table_options", "ENGINE=MyISAM").AutoMigrate(
 		&models.Device{},

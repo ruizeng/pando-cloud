@@ -7,6 +7,7 @@ before_install:
   - go get github.com/coreos/etcd
 before_script:
   - $HOME/gopath/bin/etcd &
+  - echo 'CREATE DATABASE PandoCloud' | mysql -uroot
 script:
   - cd $HOME/gopath/src/github.com/PandoCloud/pando-cloud/
   - bash ./runtest.bash

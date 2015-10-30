@@ -11,7 +11,7 @@ type Vendor struct {
 	// vendor name
 	VendorName string `sql:"type:varchar(200);not null;"`
 	// vendor key
-	VendorKey string `sql:"type:varchar(200);not null;unique;key;"`
+	VendorKey string `sql:"type:varchar(200);not null;key;"`
 	// vendor description
 	VendorDescription string `sql:"type:text;not null;"`
 	// change history
