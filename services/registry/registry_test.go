@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/PandoCloud/pando-cloud/pkg/models"
 	"github.com/PandoCloud/pando-cloud/pkg/mysql"
+	"github.com/PandoCloud/pando-cloud/pkg/rpcs"
 	"testing"
 )
 
@@ -11,14 +12,80 @@ func testVendor(t *testing.T, r *Registry) {
 		VendorName:        "testvendor",
 		VendorDescription: "this is a test vendor",
 	}
-	err := r.CreateVendor(vendor, vendor)
+	err := r.SaveVendor(vendor, vendor)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Log(vendor)
 }
 
-func TestVendor(t *testing.T) {
+var (
+	testProductKey = ""
+)
+
+func testProduct(t *testing.T, r *Registry) {
+	product := &models.Product{
+		VendorID:           1,
+		ProductName:        "test product.",
+		ProductDescription: "this is a test product",
+		ProductConfig:      "{}",
+	}
+	err := r.SaveProduct(product, product)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(product)
+
+	product.ProductName = "test for update."
+	err = r.SaveProduct(product, product)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(product)
+
+	reply := &models.Product{}
+	err = r.ValidateProduct(product.ProductKey, reply)
+	if err != nil {
+		t.Error(err)
+	}
+	t.Log(reply)
+
+	testProductKey = product.ProductKey
+
+	err = r.ValidateProduct("this is a wrong key , you know", reply)
+	if err == nil {
+		t.Error("wrong key should fail product key validation.")
+	}
+}
+
+func testDevice(t *testing.T, r *Registry) {
+	args := &rpcs.DeviceRegisterArgs{
+		ProductKey:    testProductKey,
+		DeviceCode:    "ffffaaeeccbb",
+		DeviceVersion: "android-gprs-v1",
+	}
+	device := &models.Device{}
+	err := r.RegisterDevice(args, device)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(device)
+
+	device.DeviceDescription = "test change device info."
+
+	args2 := &rpcs.DeviceUpdateArgs{
+		DeviceIdentifier:  device.DeviceIdentifier,
+		DeviceName:        "testupdatename",
+		DeviceDescription: "test change device info.",
+	}
+	err = r.UpdateDeviceInfo(args2, device)
+	if err != nil {
+		t.Error(err)
+	}
+	t.Log(device)
+}
+
+func TestRegistry(t *testing.T) {
 	mysql.MigrateDatabase(defaultDBHost, defaultDBPort, defaultDBName, defaultDBUser, "")
 
 	*confAESKey = "ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP"
@@ -29,4 +96,6 @@ func TestVendor(t *testing.T) {
 	}
 
 	testVendor(t, r)
+	testProduct(t, r)
+	testDevice(t, r)
 }
