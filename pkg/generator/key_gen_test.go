@@ -26,4 +26,15 @@ func TestKeyGen(t *testing.T) {
 	if id != testid {
 		t.Errorf("wrong id %d, want %d", id, testid)
 	}
+
+	id, err = generator.DecodeIdFromRandomKey("")
+	if err == nil {
+		t.Error("decode id from random key should return error for empty key.")
+	}
+
+	id, err = generator.DecodeIdFromRandomKey("1111111111111111111111111111111111111111")
+	if err == nil {
+		t.Errorf("decode id from random key should return error for bad key : %s", "1111111111111111111111111111111111111111")
+	}
+
 }

@@ -97,6 +97,11 @@ func (g *KeyGenerator) DecodeIdFromRandomKey(encrypted string) (int64, error) {
 	}
 
 	var id int64
+
+	if len(raw) > maxEncodeLen || len(raw) < maxEncodeLen-aes.BlockSize-binary.Size(id) {
+		return 0, errors.New("invalid key format.")
+	}
+
 	binbuf := bytes.NewBuffer(raw[maxEncodeLen-aes.BlockSize-binary.Size(id):])
 	binary.Read(binbuf, binary.BigEndian, &id)
 
