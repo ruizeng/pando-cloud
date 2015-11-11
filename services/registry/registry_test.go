@@ -86,7 +86,10 @@ func testDevice(t *testing.T, r *Registry) {
 }
 
 func TestRegistry(t *testing.T) {
-	mysql.MigrateDatabase(defaultDBHost, defaultDBPort, defaultDBName, defaultDBUser, "")
+	err := mysql.MigrateDatabase(defaultDBHost, defaultDBPort, defaultDBName, defaultDBUser, "")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	*confAESKey = "ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP"
 

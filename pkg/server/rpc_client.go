@@ -66,12 +66,12 @@ func (client *RPCClient) Call(severName string, serverMethod string, args interf
 
 		err = rpcCallWithReconnect(client.clients[mapkey], addr, serverMethod, args, reply)
 		if err != nil {
-			Log.Warn("RpcCallWithReconnect error : %s", err)
+			Log.Warnf("RpcCallWithReconnect error : %s", err)
 			continue
 		}
 
 		return nil
 	}
 
-	return errorf("rpc all failed")
+	return errorf(err.Error())
 }

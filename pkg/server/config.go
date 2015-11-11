@@ -32,5 +32,5 @@ var (
 
 	confEtcd = flag.String(FlagEtcd, "", "etcd service addr, format ip:port;ip:port")
 
-	confLogLevel = flag.String(FlagLogLevel, "warn", "default log level, options are panic|fatal|error|warn|info|debug")
+	confLogLevel = flag.String(FlagLogLevel, "info", "default log level, options are panic|fatal|error|warn|info|debug")
 )
