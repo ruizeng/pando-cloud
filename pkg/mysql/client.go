@@ -9,9 +9,6 @@ import (
 var mapClients map[string]*sql.DB
 
 func GetClient(dbhost, dbport, dbname, dbuser, dbpass string) (*sql.DB, error) {
-	if mapClients == nil {
-		mapClients = make(map[string]*sql.DB)
-	}
 
 	pattern := dbuser + ":" + dbpass + "@tcp(" + dbhost + ":" + dbport + ")/" + dbname
 	_, exist := mapClients[pattern]
@@ -31,6 +28,8 @@ func GetClient(dbhost, dbport, dbname, dbuser, dbpass string) (*sql.DB, error) {
 }
 
 func init() {
+	mapClients = make(map[string]*sql.DB)
+
 	timer := time.NewTicker(30 * time.Second)
 	go func() {
 		for {
