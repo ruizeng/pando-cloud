@@ -15,7 +15,7 @@ const (
 
 type Status struct {
 	ClientIP          string
-	AccessServerIP    string
+	AccessRPCHost     string
 	HeartbeatInterval uint32
 }
 

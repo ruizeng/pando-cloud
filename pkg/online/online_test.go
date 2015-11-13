@@ -40,7 +40,7 @@ func TestManager(t *testing.T) {
 
 	status := Status{
 		ClientIP:          "3.3.3.3",
-		AccessServerIP:    "192.168.9.1",
+		AccessRPCHost:     "192.168.9.1:20030",
 		HeartbeatInterval: 2,
 	}
 
