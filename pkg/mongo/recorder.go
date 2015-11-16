@@ -21,7 +21,7 @@ func NewRecorder(host string, set string, collection string) (*Recorder, error) 
 		session:    sess,
 		set:        set,
 		collection: collection,
-	}
+	}, nil
 }
 
 func (r *Recorder) Insert(args interface{}) error {
@@ -41,7 +41,7 @@ func (r *Recorder) FindLatest(deviceid uint64, records interface{}) error {
 		"$orderby": bson.M{"timestamp": -1},
 	}).Limit(1).One(records)
 
-	return nil
+	return err
 }
 
 func (r *Recorder) FindByTimestamp(deviceid uint64, start uint64, end uint64, records interface{}) error {
@@ -51,5 +51,5 @@ func (r *Recorder) FindByTimestamp(deviceid uint64, start uint64, end uint64, re
 		"timestamp": bson.M{"$gte": start, "$lte": end},
 	}).All(records)
 
-	return nil
+	return err
 }
