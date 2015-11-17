@@ -59,7 +59,7 @@ func testProduct(t *testing.T, r *Registry) {
 }
 
 func testDevice(t *testing.T, r *Registry) {
-	args := &rpcs.DeviceRegisterArgs{
+	args := &rpcs.ArgsDeviceRegister{
 		ProductKey:    testProductKey,
 		DeviceCode:    "ffffaaeeccbb",
 		DeviceVersion: "android-gprs-v1",
@@ -73,7 +73,7 @@ func testDevice(t *testing.T, r *Registry) {
 
 	device.DeviceDescription = "test change device info."
 
-	args2 := &rpcs.DeviceUpdateArgs{
+	args2 := &rpcs.ArgsDeviceUpdate{
 		DeviceIdentifier:  device.DeviceIdentifier,
 		DeviceName:        "testupdatename",
 		DeviceDescription: "test change device info.",
