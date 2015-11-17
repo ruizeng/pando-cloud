@@ -17,6 +17,8 @@ func NewRecorder(host string, set string, collection string) (*Recorder, error) 
 		return nil, err
 	}
 
+	sess.DB(set).C(collection).EnsureIndexKey("deviceid", "timestamp")
+
 	return &Recorder{
 		session:    sess,
 		set:        set,
@@ -26,6 +28,7 @@ func NewRecorder(host string, set string, collection string) (*Recorder, error) 
 
 func (r *Recorder) Insert(args interface{}) error {
 	dbHandler := r.session.DB(r.set).C(r.collection)
+
 	err := dbHandler.Insert(args)
 	if err != nil {
 		return err
@@ -47,7 +50,7 @@ func (r *Recorder) FindLatest(deviceid uint64, records interface{}) error {
 func (r *Recorder) FindByTimestamp(deviceid uint64, start uint64, end uint64, records interface{}) error {
 	dbHandler := r.session.DB(r.set).C(r.collection)
 	err := dbHandler.Find(bson.M{
-		"$query":    bson.M{"deviceid": deviceid},
+		"deviceid":  deviceid,
 		"timestamp": bson.M{"$gte": start, "$lte": end},
 	}).All(records)
 

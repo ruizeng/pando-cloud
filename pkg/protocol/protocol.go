@@ -4,54 +4,44 @@ import (
 	"github.com/PandoCloud/pando-cloud/pkg/tlv"
 )
 
-type CommandTypeHead struct {
+type CommandEventHead struct {
 	Flag        uint8
 	Timestamp   uint64
 	Token       [16]byte
 	SubDeviceid uint16
-	CommandId   uint16
+	No          uint16
 	Priority    uint16
 	ParamsCount uint16
 }
 
-type CommandType struct {
-	Head   CommandTypeHead
+type Command struct {
+	Head   CommandEventHead
 	Params []tlv.TLV
 }
 
-type EventTypeHead struct {
-	Flag        uint8
-	Timestamp   uint64
-	Token       [16]byte
-	SubDeviceid uint16
-	Eventid     uint16
-	Priority    uint16
-	ParamsCOunt uint16
-}
-
-type EventType struct {
-	Head   EventTypeHead
+type Event struct {
+	Head   CommandEventHead
 	Params []tlv.TLV
 }
 
-type DataTypeHead struct {
+type DataHead struct {
 	Flag      uint8
 	Timestamp uint64
 	Token     [16]byte
 }
 
-type DataType struct {
-	Head    DataTypeHead
-	SubData []SubDataType
+type Data struct {
+	Head    DataHead
+	SubData []SubData
 }
 
-type SubDataTypeHead struct {
+type SubDataHead struct {
 	SubDeviceid uint16
 	PropertyNum uint16
 	ParamsCount uint16
 }
 
-type SubDataType struct {
-	Head   SubDataTypeHead
+type SubData struct {
+	Head   SubDataHead
 	Params []tlv.TLV
 }
