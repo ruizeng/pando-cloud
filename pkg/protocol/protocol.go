@@ -16,7 +16,7 @@ type CommandTypeHead struct {
 
 type CommandType struct {
 	Head   CommandTypeHead
-	Params []TLV
+	Params []tlv.TLV
 }
 
 type EventTypeHead struct {
@@ -31,7 +31,7 @@ type EventTypeHead struct {
 
 type EventType struct {
 	Head   EventTypeHead
-	Params []TLV
+	Params []tlv.TLV
 }
 
 type DataTypeHead struct {
@@ -41,7 +41,7 @@ type DataTypeHead struct {
 }
 
 type DataType struct {
-	Head    DataTypeead
+	Head    DataTypeHead
 	SubData []SubDataType
 }
 
@@ -53,5 +53,5 @@ type SubDataTypeHead struct {
 
 type SubDataType struct {
 	Head   SubDataTypeHead
-	Params []TLV
+	Params []tlv.TLV
 }

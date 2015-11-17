@@ -29,6 +29,21 @@ type TLV struct {
 	Value []byte
 }
 
+func Uint16ToByte(value uint16) []byte {
+        buf := bytes.NewBuffer([]byte{})
+        binary.Write(buf, binary.BigEndian, value)
+
+        return buf.Bytes()
+}
+
+func ByteToUint16(buf []byte) uint16 {
+        tmpBuf := bytes.NewBuffer(buf)
+        var value uint16
+        binary.Read(tmpBuf, binary.BigEndian, &value)
+
+        return value
+}
+
 func (tlv *TLV) ToBinary() []byte {
 	buf := new(bytes.Buffer)
 	binary.Write(buf, binary.BigEndian, &tlv.Tag)
