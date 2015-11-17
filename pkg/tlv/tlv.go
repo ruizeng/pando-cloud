@@ -30,18 +30,18 @@ type TLV struct {
 }
 
 func Uint16ToByte(value uint16) []byte {
-        buf := bytes.NewBuffer([]byte{})
-        binary.Write(buf, binary.BigEndian, value)
+	buf := bytes.NewBuffer([]byte{})
+	binary.Write(buf, binary.BigEndian, value)
 
-        return buf.Bytes()
+	return buf.Bytes()
 }
 
 func ByteToUint16(buf []byte) uint16 {
-        tmpBuf := bytes.NewBuffer(buf)
-        var value uint16
-        binary.Read(tmpBuf, binary.BigEndian, &value)
+	tmpBuf := bytes.NewBuffer(buf)
+	var value uint16
+	binary.Read(tmpBuf, binary.BigEndian, &value)
 
-        return value
+	return value
 }
 
 func (tlv *TLV) ToBinary() []byte {
