@@ -1,14 +1,14 @@
 package rpcs
 
 // device register args
-type DeviceRegisterArgs struct {
+type ArgsDeviceRegister struct {
 	ProductKey    string
 	DeviceCode    string
 	DeviceVersion string
 }
 
 // device update args
-type DeviceUpdateArgs struct {
+type ArgsDeviceUpdate struct {
 	DeviceIdentifier  string
 	DeviceName        string
 	DeviceDescription string

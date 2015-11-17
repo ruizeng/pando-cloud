@@ -114,7 +114,7 @@ func (r *Registry) ValidateProduct(key string, reply *models.Product) error {
 // RegisterDevice try to register a device to our platform.
 // if the device has already been registered,
 // the registration will success return the registered device before.
-func (r *Registry) RegisterDevice(args *rpcs.DeviceRegisterArgs, reply *models.Device) error {
+func (r *Registry) RegisterDevice(args *rpcs.ArgsDeviceRegister, reply *models.Device) error {
 	db, err := getDB()
 	if err != nil {
 		return err
@@ -183,7 +183,7 @@ func (r *Registry) FindDeviceByIdentifier(identifier string, reply *models.Devic
 }
 
 // UpdateDevice will update a device info by identifier
-func (r *Registry) UpdateDeviceInfo(args *rpcs.DeviceUpdateArgs, reply *models.Device) error {
+func (r *Registry) UpdateDeviceInfo(args *rpcs.ArgsDeviceUpdate, reply *models.Device) error {
 	db, err := getDB()
 	if err != nil {
 		return err

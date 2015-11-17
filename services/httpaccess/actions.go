@@ -37,7 +37,7 @@ type DeviceAuthArgs struct {
 
 func RegisterDevice(args DeviceRegisterArgs, r render.Render) {
 	server.Log.Printf("ACTION RegisterDevice, args:: %v ", args)
-	rpcargs := &rpcs.DeviceRegisterArgs{
+	rpcargs := &rpcs.ArgsDeviceRegister{
 		ProductKey:    args.ProductKey,
 		DeviceCode:    args.DeviceCode,
 		DeviceVersion: args.Version,

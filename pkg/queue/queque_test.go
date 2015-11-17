@@ -4,6 +4,7 @@ import (
 	// "fmt"
 	"reflect"
 	"testing"
+	"time"
 )
 
 type test struct {
@@ -31,6 +32,8 @@ func TestQueue(t *testing.T) {
 	q := New("localhost:6379")
 
 	go recv(t)
+
+	time.Sleep(time.Second)
 
 	err := q.Send(testTopic, testMessage)
 	if err != nil {

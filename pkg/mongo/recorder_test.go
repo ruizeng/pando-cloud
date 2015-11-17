@@ -26,6 +26,7 @@ func TestRecorder(t *testing.T) {
 	data := rpcs.ArgsPutData{
 		DeviceId:  deviceid,
 		Timestamp: timestamp,
+		Sequence:  123,
 		Subdata: protocol.SubData{
 			Head:   protocol.SubDataHead{1, 2, 3},
 			Params: tlvs,

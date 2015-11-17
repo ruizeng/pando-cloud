@@ -1,11 +1,35 @@
 package rpcs
 
 import (
-	"github.com/PandoCloud/pando-cloud/pkg/protocol"
+	"github.com/PandoCloud/pando-cloud/pkg/online"
 )
 
-type ArgsPutData struct {
-	DeviceId  uint64
-	Timestamp uint64
-	Subdata   protocol.SubData
+type ArgsGenerateDeviceAccessToken ArgsDeviceId
+type ReplyGenerateDeviceAccessToken struct {
+	AccessToken []byte
 }
+
+type ArgsValidateDeviceAccessToken struct {
+	Id          uint64
+	AccessToken []byte
+}
+type ReplyValidateDeviceAccessToken ReplyEmptyResult
+
+type ArgsGetOnline struct {
+	Id                uint64
+	ClientIP          string
+	AccessRPCHost     string
+	HeartbeatInterval uint32
+}
+type ReplyGetOnline ReplyEmptyResult
+
+type ArgsGetOffline ArgsDeviceId
+type ReplyGetOffline ReplyEmptyResult
+
+type ArgsDeviceHeartBeat struct {
+	Id uint64
+}
+type ReplyDeviceHeartBeat ReplyEmptyResult
+
+type ArgsGetDeviceStatus ArgsDeviceId
+type ReplyGetDeviceStatus online.Status
