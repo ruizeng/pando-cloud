@@ -35,24 +35,40 @@ func validateServerManager(t *testing.T) {
 	validateGetServerHosts(t, FlagHTTPHost, *confHTTPHost)
 }
 
-func TestServer(t *testing.T) {
-	*confHTTPHost = "localhost:59000"
-	*confTCPHost = "localhost:59001"
-	*confRPCHost = "localhost:59002"
-	*confUseHttps = true
-	*confUseTls = true
-	*confCAFile = "testdata/cert.pem"
-	*confKeyFile = "testdata/key.pem"
-	*confEtcd = "http://localhost:2379"
-
-	err := Init("test")
-	if err != nil {
-		t.Fatalf("%s", err)
-	}
-
+func registerBadHandlers(t *testing.T) {
 	// test TCP
 	testtcp := &testEchoHandler{}
-	err = RegisterTCPHandler(testtcp)
+	err := RegisterTCPHandler(testtcp)
+	if err == nil {
+		t.Errorf("RegisterTCPHandler shoud fail when server is not initialized.")
+	}
+
+	// test RPC
+	testrpc := new(Arith2)
+	err = RegisterRPCHandler(testrpc)
+	if err == nil {
+		t.Errorf("RegisterRPCService shoud fail when server is not initialized.")
+	}
+
+	// test HTTP
+	testhttp := &testHttpHandler{}
+	err = RegisterHTTPHandler(testhttp)
+	if err == nil {
+		t.Errorf("RegisterHTTPServer shoud fail when server is not initialized.")
+	}
+
+	// test timer
+	timer := &testTimer{}
+	err = RegisterTimerTask(timer)
+	if err == nil {
+		t.Errorf("RegisterTimerTask shoud fail when server is not initialized.")
+	}
+}
+
+func registerHandlers(t *testing.T) {
+	// test TCP
+	testtcp := &testEchoHandler{}
+	err := RegisterTCPHandler(testtcp)
 	if err != nil {
 		t.Errorf("RegisterTCPHandler : %s", err)
 	}
@@ -77,6 +93,27 @@ func TestServer(t *testing.T) {
 	if err != nil {
 		t.Errorf("RegisterTimerTask : %s", err)
 	}
+}
+
+func TestServer(t *testing.T) {
+	*confHTTPHost = "localhost:59000"
+	*confTCPHost = "localhost:59001"
+	*confRPCHost = "localhost:59002"
+	*confUseHttps = true
+	*confUseTls = true
+	*confCAFile = "testdata/cert.pem"
+	*confKeyFile = "testdata/key.pem"
+	*confEtcd = "http://localhost:2379"
+
+	// before init , should all fail
+	registerBadHandlers(t)
+
+	err := Init("test")
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+
+	registerHandlers(t)
 
 	go func() {
 		err = Run()

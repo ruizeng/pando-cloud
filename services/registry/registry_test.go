@@ -93,6 +93,7 @@ func TestRegistry(t *testing.T) {
 
 	*confAESKey = "ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP"
 
+	*confDBPass = ""
 	r, err := NewRegistry()
 	if err != nil {
 		t.Fatal(err)

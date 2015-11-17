@@ -52,13 +52,27 @@ func validateHTTPSServer(t *testing.T, url string) {
 func TestHTTPServer(t *testing.T) {
 	initLog("test", "debug")
 
+	*confCAFile = ""
+	*confKeyFile = ""
+
 	svr := HTTPServer{
+		addr:     testHTTPHost,
+		handler:  testHttpHandler{},
+		useHttps: true,
+	}
+
+	err := svr.Start()
+	if err == nil {
+		t.Errorf("https server should start fail when no keyfile and cafile set.")
+	}
+
+	svr = HTTPServer{
 		addr:     testHTTPHost,
 		handler:  testHttpHandler{},
 		useHttps: false,
 	}
 
-	err := svr.Start()
+	err = svr.Start()
 	if err != nil {
 		t.Fatal(err)
 	}
