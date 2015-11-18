@@ -13,18 +13,12 @@ func main() {
 	}
 
 	// register a rpc service
-	/*
-		r, err := NewRegistry()
-		if err != nil {
-			server.Log.Fatal(err)
-			return
-		}
-		err = server.RegisterRPCHandler(r)
-		if err != nil {
-			server.Log.Errorf("Register RPC service Error: %s", err)
-			return
-		}
-	*/
+	dm := NewDeviceManager(*confRedisHost)
+	err = server.RegisterRPCHandler(dm)
+	if err != nil {
+		server.Log.Errorf("Register RPC service Error: %s", err)
+		return
+	}
 
 	// start to run
 	err = server.Run()

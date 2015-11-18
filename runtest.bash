@@ -6,7 +6,7 @@
 
 set -e
 
-function go_files { find . -name '*_test.go' ; }
+function go_files { find ./pkg -name '*_test.go' ; }
 function filter { grep -v '/_' ; }
 function remove_relative_prefix { sed -e 's/^\.\///g' ; }
 

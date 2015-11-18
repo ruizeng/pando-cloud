@@ -11,7 +11,7 @@ type DeviceManager struct {
 	tokenHelper   *token.Helper
 }
 
-func NewDeviceManager(redishost string) (*DeviceManager, error) {
+func NewDeviceManager(redishost string) *DeviceManager {
 	mgr := online.NewManager(redishost)
 
 	helper := token.NewHelper(redishost)
@@ -19,7 +19,7 @@ func NewDeviceManager(redishost string) (*DeviceManager, error) {
 	return &DeviceManager{
 		onlineManager: mgr,
 		tokenHelper:   helper,
-	}, nil
+	}
 }
 
 func (dm *DeviceManager) GenerateDeviceAccessToken(args rpcs.ArgsGenerateDeviceAccessToken, reply *rpcs.ReplyGenerateDeviceAccessToken) error {
@@ -33,6 +33,7 @@ func (dm *DeviceManager) GenerateDeviceAccessToken(args rpcs.ArgsGenerateDeviceA
 }
 
 func (dm *DeviceManager) ValidateDeviceAccessToken(args rpcs.ArgsValidateDeviceAccessToken, reply *rpcs.ReplyValidateDeviceAccessToken) error {
+	dm.onlineManager.SetHeartbeat(args.Id)
 	return dm.tokenHelper.ValidateToken(args.Id, args.AccessToken)
 }
 
@@ -44,7 +45,7 @@ func (dm *DeviceManager) GetOnline(args rpcs.ArgsGetOnline, reply *rpcs.ReplyGet
 	})
 }
 
-func (dm *DeviceManager) HeartBeat(args rpcs.ArgsDeviceHeartBeat, reply *rpcs.ReplyDeviceHeartBeat) error {
+func (dm *DeviceManager) HeartBeat(args rpcs.ArgsHeartBeat, reply *rpcs.ReplyHeartBeat) error {
 	return dm.onlineManager.SetHeartbeat(args.Id)
 }
 

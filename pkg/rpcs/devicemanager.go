@@ -26,10 +26,10 @@ type ReplyGetOnline ReplyEmptyResult
 type ArgsGetOffline ArgsDeviceId
 type ReplyGetOffline ReplyEmptyResult
 
-type ArgsDeviceHeartBeat struct {
+type ArgsHeartBeat struct {
 	Id uint64
 }
-type ReplyDeviceHeartBeat ReplyEmptyResult
+type ReplyHeartBeat ReplyEmptyResult
 
 type ArgsGetDeviceStatus ArgsDeviceId
 type ReplyGetDeviceStatus online.Status
