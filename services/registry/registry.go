@@ -182,6 +182,23 @@ func (r *Registry) FindDeviceByIdentifier(identifier string, reply *models.Devic
 	return nil
 }
 
+// FindDeviceById will find the device with given id
+func (r *Registry) FindDeviceById(id int64, reply *models.Device) error {
+	db, err := getDB()
+	if err != nil {
+		return err
+	}
+
+	err = db.Where(&models.Device{
+		ID: id,
+	}).First(reply).Error
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // UpdateDevice will update a device info by identifier
 func (r *Registry) UpdateDeviceInfo(args *rpcs.ArgsDeviceUpdate, reply *models.Device) error {
 	db, err := getDB()

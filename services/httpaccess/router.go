@@ -11,6 +11,6 @@ func route(m *martini.ClassicMartini) {
 	m.Post("/v1/devices/registration", binding.Json(DeviceRegisterArgs{}), RegisterDevice)
 
 	// auth device
-	// m.Post("v1/devices/authentication", binding.Json(DeviceAuthArgs{}), actions.AuthDevice)
+	m.Post("/v1/devices/authentication", binding.Json(DeviceAuthArgs{}), AuthDevice)
 
 }

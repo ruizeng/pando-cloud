@@ -20,7 +20,7 @@ func (t *testTimer) DoTask() {
 }
 
 func validateGetServerHosts(t *testing.T, flag string, want string) {
-	hosts, err := serverInstance.svrmgr.GetServerHosts("test", flag)
+	hosts, err := GetServerHosts("test", flag)
 	if err != nil {
 		t.Error(err)
 	}

@@ -71,6 +71,23 @@ func testDevice(t *testing.T, r *Registry) {
 	}
 	t.Log(device)
 
+	founddev := &models.Device{}
+	err = r.FindDeviceById(device.ID, founddev)
+	if err != nil {
+		t.Error(err)
+	}
+	if device.DeviceIdentifier != founddev.DeviceIdentifier {
+		t.Errorf("FindDeviceById not match, want %v, got %v", device, founddev)
+	}
+
+	err = r.FindDeviceByIdentifier(device.DeviceIdentifier, founddev)
+	if err != nil {
+		t.Error(err)
+	}
+	if device.ID != founddev.ID {
+		t.Errorf("FindDeviceByIdentifier not match, want %v, got %v", device, founddev)
+	}
+
 	device.DeviceDescription = "test change device info."
 
 	args2 := &rpcs.ArgsDeviceUpdate{
