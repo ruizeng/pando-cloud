@@ -23,16 +23,10 @@ func TestRecorder(t *testing.T) {
 	deviceid := uint64(12345)
 	timestamp := uint64(time.Now().Unix() * 1000)
 
-	maxData := rpcs.ArgsPutData{}
-	err = r.FindMaxSequence(deviceid, &maxData)
-	if err != nil {
-		t.Error(err)
-	}
-
 	data := rpcs.ArgsPutData{
 		DeviceId:  deviceid,
 		Timestamp: timestamp,
-		Sequence:  maxData.Sequence + 1,
+		Sequence:  123,
 		Subdata: protocol.SubData{
 			Head:   protocol.SubDataHead{1, 2, 3},
 			Params: tlvs,

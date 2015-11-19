@@ -18,7 +18,6 @@ func NewRecorder(host string, set string, collection string) (*Recorder, error) 
 	}
 
 	sess.DB(set).C(collection).EnsureIndexKey("deviceid", "timestamp")
-	sess.DB(set).C(collection).EnsureIndexKey("deviceid", "sequence")
 
 	return &Recorder{
 		session:    sess,
@@ -43,16 +42,6 @@ func (r *Recorder) FindLatest(deviceid uint64, record interface{}) error {
 	err := dbHandler.Find(bson.M{
 		"$query":   bson.M{"deviceid": deviceid},
 		"$orderby": bson.M{"timestamp": -1},
-	}).Limit(1).One(record)
-
-	return err
-}
-
-func (r *Recorder) FindMaxSequence(deviceid uint64, record interface{}) error {
-	dbHandler := r.session.DB(r.set).C(r.collection)
-	err := dbHandler.Find(bson.M{
-		"$query":   bson.M{"deviceid": deviceid},
-		"$orderby": bson.M{"sequence": -1},
 	}).Limit(1).One(record)
 
 	return err
