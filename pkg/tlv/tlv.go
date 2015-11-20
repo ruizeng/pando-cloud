@@ -313,3 +313,34 @@ func ReadTLVs(tlvs []TLV) ([]interface{}, error) {
 	}
 	return values, nil
 }
+
+func CastTLV(value interface{}, valueType int32) interface{} {
+	switch valueType {
+	case TLV_FLOAT64:
+		return float64(value.(float64))
+	case TLV_FLOAT32:
+		return float32(value.(float64))
+	case TLV_INT8:
+		return int8(value.(float64))
+	case TLV_INT16:
+		return int16(value.(float64))
+	case TLV_INT32:
+		return int32(value.(float64))
+	case TLV_INT64:
+		return int64(value.(float64))
+	case TLV_UINT8:
+		return uint8(value.(float64))
+	case TLV_UINT16:
+		return uint16(value.(float64))
+	case TLV_UINT32:
+		return uint32(value.(float64))
+	case TLV_UINT64:
+		return uint64(value.(float64))
+	case TLV_BYTES:
+		return []byte(value.(string))
+	case TLV_URI:
+		return value.(string)
+	default:
+		return nil
+	}
+}

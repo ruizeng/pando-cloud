@@ -4,7 +4,6 @@ import (
 	"github.com/PandoCloud/pando-cloud/pkg/server"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
-	//"net/http"
 )
 
 func main() {
