@@ -16,7 +16,10 @@ func route(m *martini.ClassicMartini) {
 	// get devie current status
 	m.Get("/application/v1/devices/:identifier/status/current", GetDeviceCurrentStatus)
 
-	// auth device
-	//m.Post("/v1/devices/authentication", binding.Json(DeviceAuthArgs{}), AuthDevice)
+	// get devie latest status
+	m.Get("/application/v1/devices/:identifier/status/latest", GetDeviceLatestStatus)
+
+	// set devie status
+	m.Put("/application/v1/devices/:identifier/status", SetDeviceStatus)
 
 }

@@ -43,8 +43,8 @@ Logic layer implements IoT related business like device online, device managemen
 
 * **registry**: registry serves system level meta data and configurations. 
 * **devicemanger**: device manager is a service to processing device data and requests, and keepping device status.
-* **apiprovider**: provide restful API for applications.
-* **notifier**: notify application when device status changes.
+* **apiprovider**: provide restful API for applications and notify application when device status changes.
+* **controller**: manage device access services and route request to proper access.
 
 ### core 
 
@@ -52,7 +52,7 @@ We relay on a couple of open source solution as core services:
 
 * **mongodb**: we use mongo as device data storage engine and benefits from its simplicity and scalebility. 
 * **mysql**: global configuration like product and device info are stored in mysql.
-* **redis**: widely used as cache service.
+* **redis**: widely used as cache service. 
 * **nsq**: message queue for asynchronous communication.
 * **etcd**: server registration and discovery service.
 * **ELK**: the elasticsearch, logstash and kibana stack privodes a efficient way for log collection and analytics.
