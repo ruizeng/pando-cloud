@@ -17,18 +17,18 @@
 		},
 		{
 			"ImportPath": "github.com/coreos/etcd/client",
-			"Comment": "v2.2.0-257-g8b08fff",
-			"Rev": "8b08fff1e9aaa8ca82daad674f5f172af27037d2"
+			"Comment": "v2.3.0-alpha.0-90-gd435d44",
+			"Rev": "d435d443bb7659a2ff400c185fe5c6eea9fc81ed"
 		},
 		{
 			"ImportPath": "github.com/coreos/etcd/pkg/pathutil",
-			"Comment": "v2.2.0-257-g8b08fff",
-			"Rev": "8b08fff1e9aaa8ca82daad674f5f172af27037d2"
+			"Comment": "v2.3.0-alpha.0-90-gd435d44",
+			"Rev": "d435d443bb7659a2ff400c185fe5c6eea9fc81ed"
 		},
 		{
 			"ImportPath": "github.com/coreos/etcd/pkg/types",
-			"Comment": "v2.2.0-257-g8b08fff",
-			"Rev": "8b08fff1e9aaa8ca82daad674f5f172af27037d2"
+			"Comment": "v2.3.0-alpha.0-90-gd435d44",
+			"Rev": "d435d443bb7659a2ff400c185fe5c6eea9fc81ed"
 		},
 		{
 			"ImportPath": "github.com/garyburd/redigo/internal",

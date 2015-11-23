@@ -36,12 +36,21 @@ sudo apt-get install bzr
 首先通过`go get`命令下载并编译pando cloud代码：
 
 ```sh
-go get github.com/PandoCloud/pando-cloud/...
+go get github.com/PandoCloud/pando-cloud
 ```
+
+源代码就下载在Go工作目录的`$GOPATH/src/github.com/PandoCloud/pando-cloud`下。
 
 > 下载完成后可能会提示类似`no buildable Go source files`错误，是正常的，请无视。
 
-这时源代码就下载在Go工作目录的`$GOPATH/src/github.com/PandoCloud/pando-cloud`下，编译好的二进制文件在`$GOPATH/bin`下，可以进入该目录确认是否编译成功：
+进入目录，执行对应的编译脚本：
+
+```sh
+cd $GOPATH/src/github.com/PandoCloud/pando-cloud
+sh -x ./build/local/linux/install.sh
+```
+
+编译好的二进制文件在`$GOPATH/bin`下，可以进入该目录确认是否编译成功：
 
 ```sh
 cd $GOPATH/bin | ls
