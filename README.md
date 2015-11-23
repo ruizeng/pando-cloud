@@ -2,7 +2,7 @@
 
 PandoCloud是Pando物联网解决方案的云平台部分。
 
-[英文](docs/en/README.md)
+[English Document](docs/en/README.md)
 
 ## 什么是Pando？
 
