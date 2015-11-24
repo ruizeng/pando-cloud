@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # This script runs the cover tool on all packages with test files. If you set a
 # WEB environment variable, it will additionally open the web-based coverage
