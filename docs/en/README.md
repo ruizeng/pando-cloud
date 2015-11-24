@@ -2,7 +2,7 @@
 
 Pando Cloud is the cloud part of Pando IoT solution.
 
-[中文文档](docs/zh-cn/README.md)
+[中文文档](../../README.md)
 
 ## What is Pando?
 

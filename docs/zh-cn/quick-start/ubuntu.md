@@ -23,7 +23,7 @@ Ubuntu是基于Linux的操作系统发行版。
 
 ``` sh
 sudo apt-get install git -y
-sudo apt-get install bzr
+sudo apt-get install bzr -y
 ```
 
 #### Go
@@ -60,3 +60,63 @@ apiprovider  controller  devicemanager  mqttaccess  httpaccess  registry
 ```
 
 ## 部署
+### 1. 安装依赖服务
+#### MySQL
+
+```sh
+sudo apt-get install mysql-server -y
+```
+
+> 安装过程中会弹出设置root账号密码，如果只是单机体验，可以不设置，直接回车。
+
+#### Redis
+
+```sh
+sudo apt-get install redis-server -y
+```
+
+#### MongoDB
+
+```sh
+sudo apt-get install mongodb -y
+```
+
+#### Etcd
+
+```sh
+wget  https://github.com/coreos/etcd/releases/download/v2.2.2/etcd-v2.2.2-linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf etcd-v2.2.2-linux-amd64.tar.gz
+sudo mv /usr/local/etcd-v2.2.2-linux-amd64 /usr/local/etcd
+```
+
+然后将/usr/local/etcd加入PATH环境变量
+
+```
+export PATH=$PATH:/usr/local/etcd
+```
+
+> 这样修改的PATH重启后无效，想重启后有效可以将以上命令加入到`~/.bashrc`文件末尾。
+
+### 2. 确保服务启动
+默认情况下，Redis，MySQL，MongoDB安装好后都会自动启动。也可以通过service命令启动和重启。
+
+etcd需要手动启动：
+
+```sh
+etcd &
+```
+
+### 3. 执行启动脚本
+
+启动服务前请确保步骤1中依赖的服务已经成功安装并启动
+
+```sh
+cd $GOPATH/src/github.com/PandoCloud/pando-cloud
+sh -x ./build/local/linux/run.sh
+```
+如果没有打印异常信息，则证明顺利运行。
+
+### 4. 配置
+平台使用RESTful API进行管理和配置，可以通过curl发送http请求的方式进行配置
+
+### 5. 测试
