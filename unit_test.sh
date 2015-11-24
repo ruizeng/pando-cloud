@@ -1,10 +1,12 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 # This script runs the cover tool on all packages with test files. If you set a
 # WEB environment variable, it will additionally open the web-based coverage
 # visualizer for each package.
 
 set -e
+
+echo 'Please make sure all the core services(redis, mongodb, mysql, etcd) is started before run unit test!!!'
 
 function go_files { find ./pkg -name '*_test.go' ; }
 function filter { grep -v '/_' ; }

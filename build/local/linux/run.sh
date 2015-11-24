@@ -10,3 +10,4 @@ $GOPATH/bin/apiprovider -etcd http://localhost:2379 -httphost localhost:8888 &
 $GOPATH/bin/devicemanager -etcd http://localhost:2379 -rpchost localhost:20033 &
 $GOPATH/bin/controller -etcd http://localhost:2379 -rpchost localhost:20032 &
 
+exit 0
