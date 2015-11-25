@@ -2,7 +2,6 @@ package tlv
 
 import (
 	"bytes"
-	"fmt"
 	"reflect"
 	"testing"
 )
@@ -112,7 +111,6 @@ func TestTlvBinary(t *testing.T) {
 	buf := bytes.NewReader(bin)
 	newTlv := &TLV{}
 	newTlv.FromBinary(buf)
-	fmt.Printf("%x", bin)
 
 	if !reflect.DeepEqual(tlv, newTlv) {
 		t.Errorf("the origin:\n%x\n, now:\n%x\n", tlv, newTlv)

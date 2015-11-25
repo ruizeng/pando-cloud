@@ -22,10 +22,8 @@ type DeviceRegisterResponse struct {
 
 // device auth response data field
 type DeviceAuthData struct {
-	AccessToken   string `json:"access_token"`
-	AccessAddr    string `json:"access_addr"`
-	EventSequence uint64 `json:"event_sequence"`
-	DataSequence  uint64 `json:"data_sequence"`
+	AccessToken string `json:"access_token"`
+	AccessAddr  string `json:"access_addr"`
 }
 
 // device auth response

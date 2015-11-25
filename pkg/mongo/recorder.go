@@ -37,12 +37,12 @@ func (r *Recorder) Insert(args interface{}) error {
 	return nil
 }
 
-func (r *Recorder) FindLatest(deviceid uint64, records interface{}) error {
+func (r *Recorder) FindLatest(deviceid uint64, record interface{}) error {
 	dbHandler := r.session.DB(r.set).C(r.collection)
 	err := dbHandler.Find(bson.M{
 		"$query":   bson.M{"deviceid": deviceid},
 		"$orderby": bson.M{"timestamp": -1},
-	}).Limit(1).One(records)
+	}).Limit(1).One(record)
 
 	return err
 }

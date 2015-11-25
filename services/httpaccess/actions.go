@@ -1,16 +1,23 @@
 package main
 
 import (
+	"encoding/hex"
+	"errors"
 	"github.com/PandoCloud/pando-cloud/pkg/models"
 	"github.com/PandoCloud/pando-cloud/pkg/rpcs"
 	"github.com/PandoCloud/pando-cloud/pkg/server"
+	"github.com/PandoCloud/pando-cloud/pkg/token"
 	"github.com/martini-contrib/render"
+	"math/rand"
 	"net/http"
 )
 
 const (
-	ErrOK          = 0
-	ErrSystemFault = 10001
+	ErrOK                  = 0
+	ErrSystemFault         = 10001
+	ErrDeviceNotFound      = 10002
+	ErrWrongSecret         = 10003
+	ErrProtocolNotSuported = 10004
 )
 
 func renderError(code int, err error) Common {
@@ -57,6 +64,57 @@ func RegisterDevice(args DeviceRegisterArgs, r render.Render) {
 		DeviceKey:        device.DeviceKey,
 		DeviceIdentifier: device.DeviceIdentifier,
 	}
+	r.JSON(http.StatusOK, result)
+	return
+}
+
+func AuthDevice(args DeviceAuthArgs, r render.Render) {
+	server.Log.Printf("ACTION AuthDevice, args:: %v", args)
+	device := &models.Device{}
+	err := server.RPCCallByName("registry", "Registry.FindDeviceById", int64(args.DeviceId), device)
+	if err != nil {
+		r.JSON(http.StatusOK, renderError(ErrDeviceNotFound, err))
+		return
+	}
+
+	if device.DeviceSecret != args.DeviceSecret {
+		// device secret is wrong.
+		r.JSON(http.StatusOK, renderError(ErrWrongSecret, errors.New("wrong device secret.")))
+		return
+	}
+
+	hepler := token.NewHelper(*confRedisHost)
+	token, err := hepler.GenerateToken(uint64(device.ID))
+	if err != nil {
+		r.JSON(http.StatusOK, renderError(ErrSystemFault, err))
+		return
+	}
+
+	var hosts []string
+	switch args.Protocol {
+	case "http":
+		hosts, err = server.GetServerHosts(args.Protocol+"access", "httphost")
+	case "mqtt":
+		hosts, err = server.GetServerHosts(args.Protocol+"access", "tcphost")
+	default:
+		err = errors.New("unsuported protocol: " + args.Protocol)
+	}
+	if err != nil {
+		r.JSON(http.StatusOK, renderError(ErrProtocolNotSuported, err))
+		return
+	}
+
+	// just get a random host
+	host := hosts[rand.Intn(len(hosts))]
+
+	result := DeviceAuthResponse{}
+	result.Data = DeviceAuthData{
+		AccessToken: hex.EncodeToString(token),
+		AccessAddr:  host,
+	}
+
+	server.Log.Infof("auth device success: %v, token: %x, access: %v", device, token, host)
+
 	r.JSON(http.StatusOK, result)
 	return
 }
