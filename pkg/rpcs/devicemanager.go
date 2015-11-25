@@ -31,5 +31,5 @@ type ArgsHeartBeat struct {
 }
 type ReplyHeartBeat ReplyEmptyResult
 
-type ArgsGetDeviceStatus ArgsDeviceId
-type ReplyGetDeviceStatus online.Status
+type ArgsGetDeviceOnlineStatus ArgsDeviceId
+type ReplyGetDeviceOnlineStatus online.Status

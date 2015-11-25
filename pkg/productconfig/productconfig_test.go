@@ -2,6 +2,8 @@ package productconfig
 
 import (
 	"encoding/json"
+	"github.com/PandoCloud/pando-cloud/pkg/protocol"
+	"github.com/PandoCloud/pando-cloud/pkg/tlv"
 	"testing"
 )
 
@@ -40,7 +42,7 @@ func TestParseProductConfig(t *testing.T) {
     }
     `
 
-	c, err := NewProductConfig(config)
+	c, err := New(config)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -59,6 +61,37 @@ func TestParseProductConfig(t *testing.T) {
 		}
 		t.Log(obj)
 		t.Log(realParams)
+	}
+
+	one, err := tlv.MakeTLV(uint8(1))
+	if err != nil {
+		if err != nil {
+			t.Error(err)
+		}
+	}
+
+	params := []tlv.TLV{*one}
+	teststatus := []protocol.SubData{protocol.SubData{
+		Head: protocol.SubDataHead{
+			SubDeviceid: uint16(1),
+			PropertyNum: uint16(1),
+			ParamsCount: uint16(1),
+		},
+		Params: params,
+	}}
+
+	res, err := c.StatusToMap(teststatus)
+	if err != nil {
+		t.Error(err)
+	}
+
+	t.Log(res)
+
+	m := make(map[string][]interface{})
+	m["switch"] = []interface{}{float64(1)}
+	_, err = c.MapToStatus(m)
+	if err != nil {
+		t.Error(err)
 	}
 
 }

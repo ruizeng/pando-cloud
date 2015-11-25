@@ -1,6 +1,7 @@
 package online
 
 import (
+	"github.com/garyburd/redigo/redis"
 	"reflect"
 	"testing"
 	"time"
@@ -10,7 +11,7 @@ var testid = uint64(100)
 
 func checkOnlineStatus(t *testing.T, mgr *Manager, status Status) {
 	readstatus, err := mgr.GetStatus(testid)
-	if err != nil {
+	if err != nil && err != redis.ErrNil {
 		t.Error(err)
 	}
 
@@ -25,7 +26,7 @@ func checkOnlineStatus(t *testing.T, mgr *Manager, status Status) {
 
 func checkOfflineStatus(t *testing.T, mgr *Manager) {
 	readstatus, err := mgr.GetStatus(testid)
-	if err != nil {
+	if err != nil && err != redis.ErrNil {
 		t.Error(err)
 	}
 

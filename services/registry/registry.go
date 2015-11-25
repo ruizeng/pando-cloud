@@ -86,6 +86,16 @@ func (r *Registry) SaveProduct(product *models.Product, reply *models.Product) e
 	return nil
 }
 
+// FindProduct will find product by specified ID
+func (r *Registry) FindProduct(id int32, reply *models.Product) error {
+	db, err := getDB()
+	if err != nil {
+		return err
+	}
+
+	return db.First(reply, id).Error
+}
+
 // ValidProduct try to validate the given product key.
 // if success, it will reply the corresponding product
 func (r *Registry) ValidateProduct(key string, reply *models.Product) error {

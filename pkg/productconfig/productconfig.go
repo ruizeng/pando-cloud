@@ -3,6 +3,7 @@ package productconfig
 import (
 	"encoding/json"
 	"errors"
+	"github.com/PandoCloud/pando-cloud/pkg/protocol"
 	"github.com/PandoCloud/pando-cloud/pkg/tlv"
 )
 
@@ -39,7 +40,7 @@ type ProductConfig struct {
 	Events   []ProductCommandOrEvent
 }
 
-func NewProductConfig(config string) (*ProductConfig, error) {
+func New(config string) (*ProductConfig, error) {
 	v := &ProductConfig{}
 	err := json.Unmarshal([]byte(config), v)
 	if err != nil {
@@ -72,4 +73,51 @@ func (config *ProductConfig) ValidateStatus(label string, params []interface{}) 
 		realParams[idx] = tlv.CastTLV(params[idx], para.ValueType)
 	}
 	return status, realParams, nil
+}
+
+func (config *ProductConfig) StatusToMap(status []protocol.SubData) (map[string][]interface{}, error) {
+	result := make(map[string][]interface{})
+
+	for _, sub := range status {
+		val, err := tlv.ReadTLVs(sub.Params)
+		if err != nil {
+			return nil, err
+		}
+		label := ""
+		for _, obj := range config.Objects {
+			if obj.No == int(sub.Head.PropertyNum) {
+				label = obj.Label
+			}
+		}
+		result[label] = val
+	}
+
+	return result, nil
+}
+
+func (config *ProductConfig) MapToStatus(data map[string][]interface{}) ([]protocol.SubData, error) {
+	result := []protocol.SubData{}
+
+	for label, params := range data {
+		obj, realParams, err := config.ValidateStatus(label, params)
+		if err != nil {
+			return nil, err
+		}
+
+		tlvs, err := tlv.MakeTLVs(realParams)
+		if err != nil {
+			return nil, err
+		}
+
+		result = append(result, protocol.SubData{
+			Head: protocol.SubDataHead{
+				SubDeviceid: uint16(obj.Part),
+				PropertyNum: uint16(obj.No),
+				ParamsCount: uint16(len(realParams)),
+			},
+			Params: tlvs,
+		})
+	}
+
+	return result, nil
 }

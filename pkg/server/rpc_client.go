@@ -42,7 +42,7 @@ func rpcCallWithReconnect(client *rpc.Client, addr string, serverMethod string, 
 	return err
 }
 
-//RPC call with reconnect and retry.
+// RPC call with reconnect and retry.
 func (client *RPCClient) Call(severName string, serverMethod string, args interface{}, reply interface{}) error {
 	addrs, err := serverInstance.svrmgr.GetServerHosts(severName, FlagRPCHost)
 	if err != nil {
@@ -74,4 +74,17 @@ func (client *RPCClient) Call(severName string, serverMethod string, args interf
 	}
 
 	return errorf(err.Error())
+}
+
+// RPC call by host
+func (client *RPCClient) CallHost(host string, serverMethod string, args interface{}, reply interface{}) error {
+	if client.clients[host] == nil {
+		var err error
+		client.clients[host], err = rpc.Dial("tcp", host)
+		if err != nil {
+			Log.Errorf("RPC dial error : %s", err)
+			return err
+		}
+	}
+	return rpcCallWithReconnect(client.clients[host], host, serverMethod, args, reply)
 }

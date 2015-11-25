@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/PandoCloud/pando-cloud/pkg/mongo"
 	"github.com/PandoCloud/pando-cloud/pkg/rpcs"
+	"github.com/PandoCloud/pando-cloud/pkg/server"
 )
 
 const (
@@ -43,17 +44,45 @@ func (c *Controller) PutData(args rpcs.ArgsPutData, reply *rpcs.ReplyPutData) er
 }
 
 func (c *Controller) SetStatus(args rpcs.ArgsSetStatus, reply *rpcs.ReplySetStatus) error {
-	return nil
+	rpchost, err := getAccessRPCHost(args.DeviceId)
+	if err != nil {
+		return err
+	}
+
+	return server.RPCCallByHost(rpchost, "Access.SetStatus", args, reply)
 }
 
 func (c *Controller) GetStatus(args rpcs.ArgsGetStatus, reply *rpcs.ReplyGetStatus) error {
-	return nil
+	rpchost, err := getAccessRPCHost(args.Id)
+	if err != nil {
+		return err
+	}
+
+	return server.RPCCallByHost(rpchost, "Access.GetStatus", args, reply)
 }
 
 func (c *Controller) OnEvent(args rpcs.ArgsOnEvent, reply *rpcs.ReplyOnEvent) error {
-	return nil
+	return c.eventRecorder.Insert(args)
 }
 
 func (c *Controller) SendCommand(args rpcs.ArgsSendCommand, reply *rpcs.ReplySendCommand) error {
-	return nil
+	rpchost, err := getAccessRPCHost(args.DeviceId)
+	if err != nil {
+		return err
+	}
+
+	return server.RPCCallByHost(rpchost, "Access.SendCommand", args, reply)
+}
+
+func getAccessRPCHost(deviceid uint64) (string, error) {
+	args := rpcs.ArgsGetDeviceOnlineStatus{
+		Id: deviceid,
+	}
+	reply := &rpcs.ReplyGetDeviceOnlineStatus{}
+	err := server.RPCCallByName("devicemanager", "DeviceManager.GetDeviceOnlineStatus", args, reply)
+	if err != nil {
+		return "", err
+	}
+
+	return reply.AccessRPCHost, nil
 }

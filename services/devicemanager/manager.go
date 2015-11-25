@@ -53,11 +53,12 @@ func (dm *DeviceManager) GetOffline(args rpcs.ArgsGetOffline, reply *rpcs.ReplyG
 	return dm.onlineManager.GetOffline(args.Id)
 }
 
-func (dm *DeviceManager) GetDeviceStatus(args rpcs.ArgsGetDeviceStatus, reply *rpcs.ReplyGetDeviceStatus) error {
+func (dm *DeviceManager) GetDeviceOnlineStatus(args rpcs.ArgsGetDeviceOnlineStatus, reply *rpcs.ReplyGetDeviceOnlineStatus) error {
 	status, err := dm.onlineManager.GetStatus(args.Id)
 	if err != nil {
 		return err
 	}
+
 	reply.ClientIP = status.ClientIP
 	reply.AccessRPCHost = status.AccessRPCHost
 	reply.HeartbeatInterval = status.HeartbeatInterval

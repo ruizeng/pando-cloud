@@ -36,16 +36,13 @@ func (mgr *Manager) GetStatus(id uint64) (*Status, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	status := &Status{}
 	// get status from redis
 	bufferStr, err := redis.String(conn.Do("GET", key))
 	if err != nil {
-		if err == redis.ErrNil {
-			return nil, nil
-		} else {
-			return nil, err
-		}
+		return nil, err
 	}
-	status := &Status{}
 	err = serializer.String2Struct(bufferStr, status)
 	if err != nil {
 		return nil, err

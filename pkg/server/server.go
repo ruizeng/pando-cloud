@@ -169,6 +169,15 @@ func RPCCallByName(serverName string, serverMethod string, args interface{}, rep
 	return serverInstance.rpccli.Call(serverName, serverMethod, args, reply)
 }
 
+// rpc call by host
+func RPCCallByHost(host string, serverMethod string, args interface{}, reply interface{}) error {
+	if serverInstance == nil {
+		return errorf(errServerNotInit)
+	}
+
+	return serverInstance.rpccli.CallHost(host, serverMethod, args, reply)
+}
+
 // get server's hosts by server name and service type
 func GetServerHosts(serverName string, hostType string) ([]string, error) {
 	if serverInstance == nil {

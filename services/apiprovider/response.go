@@ -22,6 +22,5 @@ type DeviceStatusData map[string][]interface{}
 
 type DeviceStatusResponse struct {
 	Common
-	Online bool             `json:"online"`
-	Data   DeviceStatusData `json:"data"`
+	Data DeviceStatusData `json:"data"`
 }
