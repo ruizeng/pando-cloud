@@ -7,7 +7,8 @@
 package server
 
 import (
-	"github.com/vharitonsky/iniflags"
+	// "github.com/vharitonsky/iniflags"
+	"flag"
 	"net/http"
 	"net/rpc"
 	"time"
@@ -34,7 +35,7 @@ type Server struct {
 func Init(name string) error {
 	if serverInstance == nil {
 		// read config
-		iniflags.Parse()
+		flag.Parse()
 
 		// read network info
 		readNetInterfaces()

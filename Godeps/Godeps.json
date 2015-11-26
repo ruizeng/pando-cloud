@@ -78,11 +78,6 @@
 			"Rev": "ea9cd21fa0bc41ee4bdd50ac7ed8cbc7ea2ed960"
 		},
 		{
-			"ImportPath": "github.com/vharitonsky/iniflags",
-			"Comment": "v.1.0-26-g5bc2eab",
-			"Rev": "5bc2eab7e7e00b6f2cc719a06fe6b674efcd4151"
-		},
-		{
 			"ImportPath": "golang.org/x/net/context",
 			"Rev": "2cba614e8ff920c60240d2677bc019af32ee04e5"
 		},
