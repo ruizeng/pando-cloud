@@ -29,7 +29,7 @@ func SendHttpRequest(argUrl string, argReq string, argType string, argHead map[s
 	bReq := []byte(argReq)
 	req, err := http.NewRequest(argType, argUrl, bytes.NewBuffer(bReq))
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	for key, vaule := range argHead {
 		req.Header.Set(key, vaule)
@@ -40,7 +40,7 @@ func SendHttpRequest(argUrl string, argReq string, argType string, argHead map[s
 	client := &http.Client{Transport: tr}
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
@@ -49,9 +49,9 @@ func SendHttpRequest(argUrl string, argReq string, argType string, argHead map[s
 }
 
 /**
-assert the https response code
+check the https response code
 */
-func AssertHttpsCode(resp interface{}) {
+func CheckHttpsCode(resp interface{}) error {
 	res := reflect.ValueOf(resp)
 	// struct
 	if res.Kind() == reflect.Struct {
@@ -59,11 +59,14 @@ func AssertHttpsCode(resp interface{}) {
 		f := res.FieldByName("Code")
 		if f.IsValid() {
 			if f.Interface() == 0 {
-				return
+				return nil
 			} else {
-				err := errors.New("[Https Response Error]code is not equal to 0!")
-				panic(err)
+				msg := res.FieldByName("Message")
+				err := errors.New(msg.Interface().(string))
+				return err
 			}
 		}
 	}
+
+	return errors.New("response format error")
 }
