@@ -53,7 +53,13 @@ func (r *Registry) SaveVendor(vendor *models.Vendor, reply *models.Vendor) error
 		return err
 	}
 
-	reply = vendor
+	reply.ID = vendor.ID
+	reply.VendorName = vendor.VendorName
+	reply.VendorDescription = vendor.VendorDescription
+	reply.VendorKey = vendor.VendorKey
+	reply.CreatedAt = vendor.CreatedAt
+	reply.UpdatedAt = vendor.UpdatedAt
+
 	return nil
 }
 
@@ -82,7 +88,14 @@ func (r *Registry) SaveProduct(product *models.Product, reply *models.Product) e
 		return err
 	}
 
-	reply = product
+	reply.ID = product.ID
+	reply.ProductName = product.ProductName
+	reply.ProductDescription = product.ProductDescription
+	reply.ProductKey = product.ProductKey
+	reply.ProductConfig = product.ProductConfig
+	reply.CreatedAt = product.CreatedAt
+	reply.UpdatedAt = product.UpdatedAt
+
 	return nil
 }
 
