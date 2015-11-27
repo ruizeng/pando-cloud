@@ -120,3 +120,8 @@ sh -x ./build/local/linux/run.sh
 平台使用RESTful API进行管理和配置，可以通过curl发送http请求的方式进行配置
 
 ### 5. 测试
+运行测试程序`device`，可以模拟一个普通设备接入云平台，进行测试：
+```
+go install github.com/PandoCloud/pando-cloud/tests/device
+$GOPATH/bin/device
+```
