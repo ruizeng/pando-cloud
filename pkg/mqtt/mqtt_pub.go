@@ -14,9 +14,9 @@ func NewMqttPub(host string) (*MqttPub, error) {
 		return nil, err
 	}
 
-	return &MqttPub{conn:c}, nil
+	return &MqttPub{conn: c}, nil
 }
 
-func (pub *MqttPub) PublishMsg(msg BytesPayload) error {
+func (pub *MqttPub) PublishMsg(topic string, msg BytesPayload) error {
 	return nil
 }

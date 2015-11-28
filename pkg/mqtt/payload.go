@@ -7,7 +7,7 @@ import (
 type Payload interface {
 	Size() int
 	WritePayload(w io.Writer) error
-	Readpayload(r io.Reader) error
+	ReadPayload(r io.Reader, n int) error
 }
 
 type BytesPayload []byte
@@ -22,7 +22,7 @@ func (p BytesPayload) WritePayload(w io.Writer) error {
 	return err
 }
 
-func (p BytesPayload) Readpayload(r io.Reader) error {
+func (p BytesPayload) ReadPayload(r io.Reader, n int) error {
 	_, err := io.ReadFull(r, p)
 
 	return err

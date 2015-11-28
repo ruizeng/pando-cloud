@@ -9,7 +9,7 @@ type MsgHandler interface {
 }
 
 type MqttSub struct {
-	conn net.Conn
+	conn    net.Conn
 	handler MsgHandler
 }
 
@@ -19,9 +19,5 @@ func NewMqttSub(host string, h MsgHandler) (*MqttSub, error) {
 		return nil, err
 	}
 
-	return &MqttSub{conn:c, handler:h}, nil
-}
-
-func (sub *MqttSub) Start() {
-	<- make(chan bool)
+	return &MqttSub{conn: c, handler: h}, nil
 }
