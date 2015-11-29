@@ -37,7 +37,7 @@ func (rw *TestReadWriter) Write(p []byte) (int, error) {
 }
 
 func (rw *TestReadWriter) Size() int {
-        return rw.w
+        return rw.w-rw.r
 }
 
 func TestPayload(t *testing.T) {

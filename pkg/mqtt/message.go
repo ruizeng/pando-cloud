@@ -107,7 +107,7 @@ func (hdr *Header) EncodeInto(buf *bytes.Buffer, msgType TagMessageType, remaini
 
 	val := byte(msgType) << 4
 	val |= (boolToByte(hdr.DupFlag) << 3)
-	val |= (byte(hdr.QosLevel) << 1)
+	val |= byte(hdr.QosLevel) << 1
 	val |= boolToByte(hdr.Retain)
 	buf.WriteByte(val)
 	encodeLength(remainingLength, buf)
@@ -204,8 +204,6 @@ func (msg *Connect) Encode(w io.Writer) (err error) {
 }
 
 func (msg *Connect) Decode(r io.Reader, hdr Header, packetRemaining int32) (err error) {
-	msg.Header = hdr
-
 	protocolName, err := getString(r, &packetRemaining)
 	if err != nil {
 		return err
@@ -228,6 +226,7 @@ func (msg *Connect) Decode(r io.Reader, hdr Header, packetRemaining int32) (err 
 	}
 
 	*msg = Connect{
+		Header:          hdr,
 		ProtocolName:    protocolName,
 		ProtocolVersion: protocolVersion,
 		UsernameFlag:    flags&0x80 > 0,
