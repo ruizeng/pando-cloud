@@ -13,7 +13,7 @@ type MqttSvrHandler struct {
 	Wildcards []Wild
 }
 
-func NewMqttSvrHanler() *MqttSvrHandler {
+func NewMqttSvrHandler() *MqttSvrHandler {
 	return &MqttSvrHandler{}
 }
 

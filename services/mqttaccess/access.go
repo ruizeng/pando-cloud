@@ -1,14 +1,19 @@
 package main
 
 import (
+	"github.com/PandoCloud/pando-cloud/pkg/mqtt"
 	"github.com/PandoCloud/pando-cloud/pkg/rpcs"
 	"github.com/PandoCloud/pando-cloud/pkg/server"
 )
 
-type Access struct{}
+type Access struct {
+	MqttHandler *mqtt.MqttSvrHandler
+}
 
 func NewAccess() (*Access, error) {
-	return &Access{}, nil
+	return &Access{
+		mqtt.NewMqttSvrHandler(),
+	}, nil
 }
 
 func (a *Access) SetStatus(args rpcs.ArgsSetStatus, reply *rpcs.ReplySetStatus) error {

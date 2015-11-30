@@ -1,47 +1,133 @@
 package protocol
 
 import (
+	"bytes"
+	"encoding/binary"
 	"github.com/PandoCloud/pando-cloud/pkg/tlv"
 )
 
-type CommandEventHead struct {
-	Flag        uint8
-	Timestamp   uint64
-	Token       [16]byte
-	SubDeviceid uint16
-	No          uint16
-	Priority    uint16
-	ParamsCount uint16
+type Payload interface {
+	Marshal() ([]byte, error)
+	UnMarshal([]byte) error
 }
 
-type Command struct {
-	Head   CommandEventHead
-	Params []tlv.TLV
+func (c *Command) Marshal() ([]byte, error) {
+	buffer := new(bytes.Buffer)
+	err := binary.Write(buffer, binary.BigEndian, c.Head)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, param := range c.Params {
+		err = binary.Write(buffer, binary.BigEndian, param.ToBinary())
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return buffer.Bytes(), nil
 }
 
-type Event struct {
-	Head   CommandEventHead
-	Params []tlv.TLV
+func (c *Command) UnMarshal(buf []byte) error {
+	n := len(buf)
+	r := bytes.NewReader(buf)
+	err := binary.Read(r, binary.BigEndian, &c.Head)
+	if err != nil {
+		return err
+	}
+	c.Params = []tlv.TLV{}
+	for i := binary.Size(c.Head); i < n; {
+		tlv := tlv.TLV{}
+		tlv.FromBinary(r)
+		i += int(tlv.Length())
+		c.Params = append(c.Params, tlv)
+	}
+
+	return nil
 }
 
-type DataHead struct {
-	Flag      uint8
-	Timestamp uint64
-	Token     [16]byte
+func (e *Event) Marshal() ([]byte, error) {
+	buffer := new(bytes.Buffer)
+	err := binary.Write(buffer, binary.BigEndian, e.Head)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, param := range e.Params {
+		err = binary.Write(buffer, binary.BigEndian, param.ToBinary())
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return buffer.Bytes(), nil
 }
 
-type Data struct {
-	Head    DataHead
-	SubData []SubData
+func (e *Event) UnMarshal(buf []byte) error {
+	n := len(buf)
+	r := bytes.NewReader(buf)
+	err := binary.Read(r, binary.BigEndian, &e.Head)
+	if err != nil {
+		return err
+	}
+	e.Params = []tlv.TLV{}
+	for i := binary.Size(e.Head); i < n; {
+		tlv := tlv.TLV{}
+		tlv.FromBinary(r)
+		i += int(tlv.Length())
+		e.Params = append(e.Params, tlv)
+	}
+
+	return nil
 }
 
-type SubDataHead struct {
-	SubDeviceid uint16
-	PropertyNum uint16
-	ParamsCount uint16
+func (d *Data) Marshal() ([]byte, error) {
+	buffer := new(bytes.Buffer)
+	err := binary.Write(buffer, binary.BigEndian, d.Head)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, sub := range d.SubData {
+		err = binary.Write(buffer, binary.BigEndian, sub.Head)
+		if err != nil {
+			return nil, err
+		}
+		for _, param := range sub.Params {
+			err = binary.Write(buffer, binary.BigEndian, param.ToBinary())
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	return buffer.Bytes(), nil
 }
 
-type SubData struct {
-	Head   SubDataHead
-	Params []tlv.TLV
+func (d *Data) UnMarshal(buf []byte) error {
+	n := len(buf)
+	r := bytes.NewReader(buf)
+	err := binary.Read(r, binary.BigEndian, &d.Head)
+	if err != nil {
+		return err
+	}
+	d.SubData = []SubData{}
+	for i := binary.Size(d.Head); i < n; {
+		sub := SubData{}
+		err = binary.Read(r, binary.BigEndian, &sub.Head)
+		if err != nil {
+			return err
+		}
+		i += int(binary.Size(sub.Head))
+		sub.Params = []tlv.TLV{}
+		for j := 0; j < int(sub.Head.ParamsCount); j++ {
+			param := tlv.TLV{}
+			param.FromBinary(r)
+			i += int(param.Length())
+			sub.Params = append(sub.Params, param)
+		}
+		d.SubData = append(d.SubData, sub)
+	}
+
+	return nil
 }
