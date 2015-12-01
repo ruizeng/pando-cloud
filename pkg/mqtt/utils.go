@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"io"
+	"strconv"
 )
 
 func Uint16ToByte(value uint16) []byte {
@@ -20,6 +22,19 @@ func ByteToUint16(buf []byte) uint16 {
 	binary.Read(tmpBuf, binary.BigEndian, &value)
 
 	return value
+}
+
+func DeviceIdToClientId(deviceid uint64) string {
+	return strconv.FormatUint(deviceid, 16)
+}
+
+func ClientIdToDeviceId(identify string) (uint64, error) {
+	deviceId, err := strconv.ParseUint(identify, 16, 64)
+	if err != nil {
+		return uint64(0), err
+	}
+
+	return deviceId, nil
 }
 
 func boolToByte(val bool) byte {
@@ -128,4 +143,9 @@ func getString(r io.Reader, packetRemaining *int32) (string, error) {
 	*packetRemaining -= int32(strLen)
 
 	return string(b), nil
+}
+
+func errorf(format string, a ...interface{}) error {
+	err := fmt.Errorf(format, a...)
+	return err
 }

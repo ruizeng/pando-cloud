@@ -29,6 +29,14 @@ func (qos TagQosLevel) HasId() bool {
 	return qos == QosAtLeastOnce || qos == QosExactlyOnce
 }
 
+func (qos TagQosLevel) IsAtLeastOnce() bool {
+	return qos == QosAtLeastOnce
+}
+
+func (qos TagQosLevel) IsExactlyOnce() bool {
+	return qos == QosExactlyOnce
+}
+
 // Message Type
 const (
 	MsgConnect = TagMessageType(iota + 1)
