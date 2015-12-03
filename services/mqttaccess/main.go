@@ -26,7 +26,7 @@ func main() {
 	}
 
 	// register a tcp service for mqtt
-	err = server.RegisterTCPHandler(a.MqttHandler)
+	err = server.RegisterTCPHandler(a.MqttBroker)
 	if err != nil {
 		server.Log.Errorf("Register TCP service Error: %s", err)
 		return

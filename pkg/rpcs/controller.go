@@ -7,9 +7,8 @@ import (
 
 type ArgsPutData struct {
 	DeviceId  uint64
-	Sequence  uint64
 	Timestamp uint64
-	Subdata   protocol.SubData
+	Subdata   []protocol.SubData
 }
 type ReplyPutData ReplyEmptyResult
 
