@@ -23,14 +23,19 @@ func TestRecorder(t *testing.T) {
 	deviceid := uint64(12345)
 	timestamp := uint64(time.Now().Unix() * 1000)
 
+	subdata := protocol.SubData{
+		Head:   protocol.SubDataHead{1, 2, 3},
+		Params: tlvs,
+	}
+
+	subdatas := []protocol.SubData{}
+
+	subdatas = append(subdatas, subdata)
+
 	data := rpcs.ArgsPutData{
 		DeviceId:  deviceid,
 		Timestamp: timestamp,
-		Sequence:  123,
-		Subdata: protocol.SubData{
-			Head:   protocol.SubDataHead{1, 2, 3},
-			Params: tlvs,
-		},
+		Subdata:   subdatas,
 	}
 
 	err = r.Insert(data)
