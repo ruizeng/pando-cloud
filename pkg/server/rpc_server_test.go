@@ -66,7 +66,7 @@ func TestRPCServer(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	time.Sleep(time.Millisecond * 100)
+	time.Sleep(time.Millisecond * 300)
 
 	validateRPCServer(t, testRPCHost, "Arith.Multiply")
 }
