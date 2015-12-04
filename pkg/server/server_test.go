@@ -29,6 +29,14 @@ func validateGetServerHosts(t *testing.T, flag string, want string) {
 	}
 }
 
+func validateGetRPCHost(t *testing.T) {
+	host := GetRPCHost()
+
+	if host == "" {
+		t.Error("get rpc host test error")
+	}
+}
+
 func validateServerManager(t *testing.T) {
 	validateGetServerHosts(t, FlagTCPHost, *confTCPHost)
 	validateGetServerHosts(t, FlagRPCHost, *confRPCHost)
@@ -129,4 +137,5 @@ func TestServer(t *testing.T) {
 	validateRPCServer(t, *confRPCHost, "Arith2.Multiply")
 	validateRPCClient(t)
 	validateServerManager(t)
+	validateGetRPCHost(t)
 }
