@@ -125,3 +125,5 @@ sh -x ./build/local/linux/run.sh
 go install github.com/PandoCloud/pando-cloud/tests/device
 $GOPATH/bin/device
 ```
+
+也可以使用任何实现了[Pando嵌入式框架](https://github.com/PandoCloud/pando-embeded-framework)的设备进行测试。(登录地址改为本地http接入服务器地址)

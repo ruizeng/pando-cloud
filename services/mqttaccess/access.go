@@ -1,11 +1,18 @@
 package main
 
 import (
+	"errors"
 	"github.com/PandoCloud/pando-cloud/pkg/mqtt"
 	"github.com/PandoCloud/pando-cloud/pkg/protocol"
 	"github.com/PandoCloud/pando-cloud/pkg/rpcs"
 	"github.com/PandoCloud/pando-cloud/pkg/server"
 	"time"
+)
+
+const (
+	defaultTimeoutSecond = 5
+
+	commandGetCurrentStatus = uint16(65528)
 )
 
 type Access struct {
@@ -33,12 +40,41 @@ func (a *Access) SetStatus(args rpcs.ArgsSetStatus, reply *rpcs.ReplySetStatus) 
 	if err != nil {
 		return err
 	}
-	return a.MqttBroker.SendMessageToDevice(args.DeviceId, "d", msg)
+	return a.MqttBroker.SendMessageToDevice(args.DeviceId, "d", msg, defaultTimeoutSecond*time.Second)
 }
 
 func (a *Access) GetStatus(args rpcs.ArgsGetStatus, reply *rpcs.ReplyGetStatus) error {
 	server.Log.Infof("Access Get Status: %v", args)
-	return nil
+	// first send a get status command
+	cmdArgs := rpcs.ArgsSendCommand{
+		DeviceId:  args.Id,
+		SubDevice: 0,
+		No:        commandGetCurrentStatus,
+		Priority:  99,
+		WaitTime:  0,
+	}
+	cmdReply := rpcs.ReplySendCommand{}
+	err := a.SendCommand(cmdArgs, &cmdReply)
+	if err != nil {
+		return err
+	}
+
+	// then wait for status report
+	StatusChan[args.Id] = make(chan *protocol.Data)
+	timer := time.NewTimer(defaultTimeoutSecond * time.Second)
+	select {
+	case <-timer.C:
+		// timeout
+		close(StatusChan[args.Id])
+		delete(StatusChan, args.Id)
+		return errors.New("get status timeout.")
+	case data := <-StatusChan[args.Id]:
+		// go it
+		close(StatusChan[args.Id])
+		delete(StatusChan, args.Id)
+		reply.Status = data.SubData
+		return nil
+	}
 }
 
 func (a *Access) SendCommand(args rpcs.ArgsSendCommand, reply *rpcs.ReplySendCommand) error {
@@ -58,5 +94,5 @@ func (a *Access) SendCommand(args rpcs.ArgsSendCommand, reply *rpcs.ReplySendCom
 	if err != nil {
 		return err
 	}
-	return a.MqttBroker.SendMessageToDevice(args.DeviceId, "c", msg)
+	return a.MqttBroker.SendMessageToDevice(args.DeviceId, "c", msg, time.Duration(args.WaitTime)*time.Second)
 }

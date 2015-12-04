@@ -51,6 +51,14 @@ func (mp *MQTTProvider) OnDeviceMessage(deviceid uint64, msgtype string, message
 			server.Log.Errorf("unmarshal data error : %v", err)
 			return
 		}
+		// if there is a realtime query
+		ch, exist := StatusChan[deviceid]
+		if exist {
+			ch <- data
+			return
+		}
+
+		// it's a normal report.
 		reply := rpcs.ReplyPutData{}
 		args := rpcs.ArgsPutData{
 			DeviceId:  deviceid,

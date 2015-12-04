@@ -2,6 +2,7 @@ package mqtt
 
 import (
 	"encoding/hex"
+	"errors"
 	"github.com/PandoCloud/pando-cloud/pkg/rpcs"
 	"github.com/PandoCloud/pando-cloud/pkg/server"
 	"io"
@@ -22,23 +23,25 @@ type ResponseType struct {
 }
 
 type Connection struct {
-	DeviceId   uint64
-	Conn       net.Conn
-	SendChan   chan Message
-	Mgr        *Manager
-	MessageId  uint16
-	KeepAlive  uint16
-	LastHbTime int64
-	Token      []byte
+	Mgr             *Manager
+	DeviceId        uint64
+	Conn            net.Conn
+	SendChan        chan Message
+	MessageId       uint16
+	MessageWaitChan map[uint16]chan error
+	KeepAlive       uint16
+	LastHbTime      int64
+	Token           []byte
 }
 
 func NewConnection(conn net.Conn, mgr *Manager) *Connection {
 	sendchan := make(chan Message, SendChanLen)
 	c := &Connection{
-		Conn:      conn,
-		SendChan:  sendchan,
-		Mgr:       mgr,
-		KeepAlive: defaultKeepAlive,
+		Conn:            conn,
+		SendChan:        sendchan,
+		Mgr:             mgr,
+		KeepAlive:       defaultKeepAlive,
+		MessageWaitChan: make(map[uint16]chan error),
 	}
 
 	go c.SendMsgToClient()
@@ -50,6 +53,44 @@ func NewConnection(conn net.Conn, mgr *Manager) *Connection {
 func (c *Connection) Submit(msg Message) {
 	if c.Conn != nil {
 		c.SendChan <- msg
+	}
+}
+
+// Publish will publish a message , and return a chan to wait for completion.
+func (c *Connection) Publish(msg Message, timeout time.Duration) chan error {
+	message := msg.(*Publish)
+	message.MessageId = c.MessageId
+	c.MessageId++
+	c.Submit(message)
+
+	// we don't wait for confirm.
+	if timeout == 0 {
+		return nil
+	}
+
+	ch := make(chan error)
+	c.MessageWaitChan[message.MessageId] = ch
+	// wait for timeout and
+	go func() {
+		timer := time.NewTimer(timeout)
+		<-timer.C
+		waitCh, exist := c.MessageWaitChan[message.MessageId]
+		if exist {
+			waitCh <- errors.New("timeout pushlishing message.")
+			delete(c.MessageWaitChan, message.MessageId)
+			close(waitCh)
+		}
+	}()
+
+	return ch
+}
+
+func (c *Connection) confirmPublish(messageid uint16) {
+	waitCh, exist := c.MessageWaitChan[messageid]
+	if exist {
+		waitCh <- nil
+		delete(c.MessageWaitChan, messageid)
+		close(waitCh)
 	}
 }
 
@@ -169,7 +210,7 @@ func (c *Connection) RcvMsgFromClient() {
 
 		case *PubAck:
 			server.Log.Infof("%s, comes publish ack", host)
-			// TODO  - notify sender
+			c.confirmPublish(msg.MessageId)
 
 		case *PubRec:
 			server.Log.Infof("%s, comes publish rec", host)
@@ -183,7 +224,7 @@ func (c *Connection) RcvMsgFromClient() {
 
 		case *PubComp:
 			server.Log.Infof("%s, comes publish comp", host)
-			// TODO  - notify sender
+			c.confirmPublish(msg.MessageId)
 
 		case *PingReq:
 			server.Log.Infof("%s, ping req comes", host)
@@ -222,21 +263,6 @@ func (c *Connection) SendMsgToClient() {
 		if !ok {
 			server.Log.Error("%s is end now", host)
 			return
-		}
-
-		switch msg := msg.(type) {
-		case *Publish:
-			server.Log.Infof("publish msg, check for resend")
-			if msg.QosLevel.IsAtLeastOnce() || msg.QosLevel.IsExactlyOnce() {
-				msg.MessageId = c.MessageId
-				c.MessageId++
-			}
-		case *PubRel:
-			server.Log.Infof("pubrel msg, check for resend")
-			msg.MessageId = c.MessageId
-			c.MessageId++
-		default:
-			server.Log.Infof("normal msg")
 		}
 
 		server.Log.Debug("send msg to %s=======\n%v\n=========", host, msg)

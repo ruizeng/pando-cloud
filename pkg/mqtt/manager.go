@@ -60,7 +60,7 @@ func (m *Manager) GetToken(deviceid uint64) ([]byte, error) {
 	return con.Token, nil
 }
 
-func (m *Manager) PublishMessage2Device(deviceid uint64, msg *Publish) error {
+func (m *Manager) PublishMessage2Device(deviceid uint64, msg *Publish, timeout time.Duration) error {
 	m.CxtMutex.RLock()
 	con, exist := m.IdToConn[deviceid]
 	m.CxtMutex.RUnlock()
@@ -68,9 +68,8 @@ func (m *Manager) PublishMessage2Device(deviceid uint64, msg *Publish) error {
 		return errorf("device not exist: %v", deviceid)
 	}
 
-	con.Submit(msg)
-
-	return nil
+	err := <-con.Publish(msg, timeout)
+	return err
 }
 
 func (m *Manager) PublishMessage2Server(deviceid uint64, msg *Publish) error {
