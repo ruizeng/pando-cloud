@@ -188,6 +188,15 @@ func GetServerHosts(serverName string, hostType string) ([]string, error) {
 	return serverInstance.svrmgr.GetServerHosts(serverName, hostType)
 }
 
+// get this server's rpc host
+func GetRPCHost() string {
+	if serverInstance == nil || serverInstance.rpcsvr == nil {
+		return ""
+	}
+
+	return serverInstance.rpcsvr.addr
+}
+
 // start service
 func Run() error {
 	if serverInstance == nil {

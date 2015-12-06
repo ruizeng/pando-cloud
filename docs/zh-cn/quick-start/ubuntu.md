@@ -98,7 +98,7 @@ export PATH=$PATH:/usr/local/etcd
 > 这样修改的PATH重启后无效，想重启后有效可以将以上命令加入到`~/.bashrc`文件末尾。
 
 ### 2. 确保服务启动
-默认情况下，Redis，MySQL，MongoDB安装好后都会自动启动。也可以通过service命令启动和重启。
+默认情况下，Redis，MySQL，MongoDB安装好后都会自动启动。也可以通过`service`命令启动和重启。
 
 etcd需要手动启动：
 
@@ -117,11 +117,21 @@ sh -x ./build/local/linux/run.sh
 如果没有打印异常信息，则证明顺利运行。
 
 ### 4. 配置
-平台使用RESTful API进行管理和配置，可以通过curl发送http请求的方式进行配置
+平台提供命令行配置工具进行配置，安装方法：
+```sh
+go install github.com/PandoCloud/pando-cloud/tools/pdcfg
+```
+
+详细使用方法请参考[配置工具](../tools/pdcfg.md)
+
 
 ### 5. 测试
 运行测试程序`device`，可以模拟一个普通设备接入云平台，进行测试：
-```
+```sh
 go install github.com/PandoCloud/pando-cloud/tests/device
 $GOPATH/bin/device
 ```
+
+也可以使用任何实现了[Pando嵌入式框架](https://github.com/PandoCloud/pando-embeded-framework)的设备进行测试。(登录地址改为本地http接入服务器地址)
+
+通过HTTP请求工具（如`curl`）向api服务器发送请求就可以测试读取、设置设备状态。

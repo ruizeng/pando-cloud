@@ -12,15 +12,23 @@ func main() {
 		return
 	}
 
-	// register a rpc service
 	a, err := NewAccess()
 	if err != nil {
 		server.Log.Fatal(err)
 		return
 	}
+
+	// register a rpc service
 	err = server.RegisterRPCHandler(a)
 	if err != nil {
 		server.Log.Errorf("Register RPC service Error: %s", err)
+		return
+	}
+
+	// register a tcp service for mqtt
+	err = server.RegisterTCPHandler(a.MqttBroker)
+	if err != nil {
+		server.Log.Errorf("Register TCP service Error: %s", err)
 		return
 	}
 
