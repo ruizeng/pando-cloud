@@ -77,3 +77,16 @@ Pando的目的是为了提供一套可应用于实际生产环境的的物联网
 ## 快速开始
 
 [快速开始](docs/zh-cn/quick-start/README.md)介绍如何在自己的服务器或者pc机上单机部署pando物联网云。
+
+## 开发应用
+基于pando平台的物联网应用分为**设备端**和**应用服务器**。
+
+* **设备端**负责实现数据流的传输和管理，须符合[pando物联网应用协议](https://github.com/PandoCloud/pando-protocol)；我们提供了[Pando嵌入式开发框架](https://github.com/PandoCloud/pando-embeded-framework)封装了协议的实现，并支持移植到不同的硬件平台。也可根据[设备接入接口文档](./docs/zh-cn/api-doc/device.md)自行实现设备端移植。
+* **应用服务器**负责实现设备管理和交互的业务逻辑，并负责和用户终端（如手机，pc，微信等）进行交互。应用服务区器通过REST API访问Pando云平台的HTTP接口来实现对设备的操作，并通过向云平台注册回调URL接收设备的状态变化的事件通知。具体可参考[应用服务器接口文档](./docs/zh-cn/api-doc/application.md)。
+
+## 贡献项目
+pando物联网平台是完全开源免费的物联网解决方案，欢迎大家以各种形式贡献项目。
+
+* **反馈问题**：我们鼓励通过[提交Issue](https://github.com/PandoCloud/pando-cloud/issues/new)的方式反馈您在使用中遇到的疑问或问题。
+* **提出建议**：同样，可以通过[提交Issue](https://github.com/PandoCloud/pando-cloud/issues/new)向我们提供改进意见，同时可以通过加入我们的讨论QQ群（488074716）或者参加我们主办的线下物联网技术沙龙一起讨论。
+* **贡献代码**：非常欢迎有能力的朋友一起参与Pando物联网平台的开发，一起构建开放、免费、开源的物联网解决方案。请按照[贡献流程](./docs/zh-cn/contribution/work-flow.md)参与项目开发。
