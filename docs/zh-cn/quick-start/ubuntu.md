@@ -32,7 +32,7 @@ sudo apt-get install bzr -y
 首先通过`go get`命令下载并编译pando cloud代码：
 
 ```sh
-go get github.com/PandoCloud/pando-cloud
+go get -u github.com/PandoCloud/pando-cloud
 ```
 
 源代码就下载在Go工作目录的`$GOPATH/src/github.com/PandoCloud/pando-cloud`下。
