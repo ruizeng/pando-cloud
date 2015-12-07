@@ -166,7 +166,12 @@ func (c *Connection) RcvMsgFromClient() {
 			}
 			c.DeviceId = deviceid
 
-			token, _ := hex.DecodeString(msg.Password)
+			token, err := hex.DecodeString(msg.Password)
+			if err != nil {
+				server.Log.Warn("token format error : %v", err)
+				ret = RetCodeNotAuthorized
+				goto CLOSE
+			}
 			err = c.ValidateToken(token)
 			if err != nil {
 				server.Log.Warn("validate token error : %v", err)

@@ -4,6 +4,9 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	MQTT "git.eclipse.org/gitroot/paho/org.eclipse.paho.mqtt.golang.git"
+	"strings"
+	"time"
 )
 
 // device register args
@@ -54,23 +57,23 @@ type DeviceAuthResponse struct {
 
 type Device struct {
 	// API URL
-	BrokerUrl string
+	Url string
 
 	// basic info
 	ProductKey string
 	DeviceCode string
 	Version    string
 
-	// private thins
+	// private things
 	id      int64
 	secrect string
 	token   []byte
 	access  string
 }
 
-func NewDevice(broker string, productkey string, code string, version string) *Device {
+func NewDevice(url string, productkey string, code string, version string) *Device {
 	return &Device{
-		BrokerUrl:  broker,
+		Url:        url,
 		ProductKey: productkey,
 		DeviceCode: code,
 		Version:    version,
@@ -83,7 +86,7 @@ func (d *Device) DoRegister() error {
 		DeviceCode: d.DeviceCode,
 		Version:    d.Version,
 	}
-	regUrl := fmt.Sprintf("%v%v", d.BrokerUrl, "/v1/devices/registration")
+	regUrl := fmt.Sprintf("%v%v", d.Url, "/v1/devices/registration")
 	request, err := json.Marshal(args)
 	if err != nil {
 		return err
@@ -112,9 +115,9 @@ func (d *Device) DoLogin() error {
 	args := DeviceAuthArgs{
 		DeviceId:     d.id,
 		DeviceSecret: d.secrect,
-		Protocol:     "http",
+		Protocol:     "mqtt",
 	}
-	regUrl := fmt.Sprintf("%v%v", d.BrokerUrl, "/v1/devices/authentication")
+	regUrl := fmt.Sprintf("%v%v", d.Url, "/v1/devices/authentication")
 	request, err := json.Marshal(args)
 	if err != nil {
 		return err
@@ -139,6 +142,40 @@ func (d *Device) DoLogin() error {
 	}
 	d.token = htoken
 	d.access = response.Data.AccessAddr
+
+	return nil
+}
+
+func (d *Device) messageHandler(client *MQTT.Client, msg MQTT.Message) {
+	fmt.Printf("TOPIC: %s\n", msg.Topic())
+	fmt.Printf("MSG: %s\n", msg.Payload())
+	topicPieces := strings.Split(msg.Topic())
+	clientid := topicPieces[0]
+	msgtype := topicPieces[1]
+}
+
+func (d *Device) DoAccess() error {
+
+	//create a ClientOptions struct setting the broker address, clientid, turn
+	//off trace output and set the default message handler
+	opts := MQTT.NewClientOptions().AddBroker("tcp://" + d.access)
+	clientid := fmt.Sprintf("%x", d.id)
+	opts.SetClientID(clientid)
+	opts.SetUsername(clientid) // clientid as username
+	opts.SetPassword(hex.EncodeToString(d.token))
+	opts.SetKeepAlive(30 * time.Second)
+	opts.SetDefaultPublishHandler(d.messageHandler)
+
+	//create and start a client using the above ClientOptions
+	c := MQTT.NewClient(opts)
+	if token := c.Connect(); token.Wait() && token.Error() != nil {
+		return token.Error()
+	}
+
+	// we just pause here to wait for messages
+	<-make(chan int)
+
+	defer c.Disconnect(250)
 
 	return nil
 }

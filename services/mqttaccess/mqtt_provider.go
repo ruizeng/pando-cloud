@@ -13,8 +13,12 @@ func NewMQTTProvider() *MQTTProvider {
 }
 
 func (mp *MQTTProvider) ValidateDeviceToken(deviceid uint64, token []byte) error {
+	args := rpcs.ArgsValidateDeviceAccessToken{
+		Id:          deviceid,
+		AccessToken: token,
+	}
 	reply := rpcs.ReplyValidateDeviceAccessToken{}
-	err := server.RPCCallByName("devicemanager", "DeviceManager.ValidateDeviceAccessToken", deviceid, &reply)
+	err := server.RPCCallByName("devicemanager", "DeviceManager.ValidateDeviceAccessToken", args, &reply)
 	if err != nil {
 		server.Log.Errorf("validate device token error. deviceid : %v, token : %v, error: %v", deviceid, token, err)
 	}
@@ -28,15 +32,21 @@ func (mp *MQTTProvider) OnDeviceOnline(args rpcs.ArgsGetOnline) {
 	}
 }
 func (mp *MQTTProvider) OnDeviceOffline(deviceid uint64) {
+	args := rpcs.ArgsGetOffline{
+		Id: deviceid,
+	}
 	reply := rpcs.ReplyGetOffline{}
-	err := server.RPCCallByName("devicemanager", "DeviceManager.GetOffline", deviceid, &reply)
+	err := server.RPCCallByName("devicemanager", "DeviceManager.GetOffline", args, &reply)
 	if err != nil {
 		server.Log.Errorf("device offline error. deviceid: %v, error: %v", deviceid, err)
 	}
 }
 func (mp *MQTTProvider) OnDeviceHeartBeat(deviceid uint64) {
+	args := rpcs.ArgsDeviceId{
+		Id: deviceid,
+	}
 	reply := rpcs.ReplyHeartBeat{}
-	err := server.RPCCallByName("devicemanager", "DeviceManager.HeartBeat", deviceid, &reply)
+	err := server.RPCCallByName("devicemanager", "DeviceManager.HeartBeat", args, &reply)
 	if err != nil {
 		server.Log.Errorf("device heartbeat error. deviceid: %v, error: %v", deviceid, err)
 	}
