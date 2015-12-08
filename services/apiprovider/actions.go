@@ -88,7 +88,7 @@ func GetDeviceCurrentStatus(urlparams martini.Params, r render.Render) {
 		Id: uint64(device.ID),
 	}
 	onlinereply := rpcs.ReplyGetDeviceOnlineStatus{}
-	err = server.RPCCallByName("devicemanger", "DeviceManager.GetDeviceOnlineStatus", onlineargs, &onlinereply)
+	err = server.RPCCallByName("devicemanager", "DeviceManager.GetDeviceOnlineStatus", onlineargs, &onlinereply)
 	if err != nil {
 		server.Log.Errorf("get devie online status error: %v", err)
 		r.JSON(http.StatusOK, renderError(ErrDeviceNotOnline, err))
@@ -99,7 +99,7 @@ func GetDeviceCurrentStatus(urlparams martini.Params, r render.Render) {
 		Id: uint64(device.ID),
 	}
 	statusreply := rpcs.ReplyGetStatus{}
-	err = server.RPCCallByName("controller", "Access.GetStatus", statusargs, &statusreply)
+	err = server.RPCCallByName("controller", "Controller.GetStatus", statusargs, &statusreply)
 	if err != nil {
 		server.Log.Errorf("get devie status error: %v", err)
 		r.JSON(http.StatusOK, renderError(ErrSystemFault, err))
@@ -151,7 +151,7 @@ func SetDeviceStatus(urlparams martini.Params, req *http.Request, r render.Rende
 		Id: uint64(device.ID),
 	}
 	onlinereply := rpcs.ReplyGetDeviceOnlineStatus{}
-	err = server.RPCCallByName("devicemanger", "DeviceManager.GetDeviceOnlineStatus", onlineargs, &onlinereply)
+	err = server.RPCCallByName("devicemanager", "DeviceManager.GetDeviceOnlineStatus", onlineargs, &onlinereply)
 	if err != nil {
 		server.Log.Errorf("get devie online status error: %v", err)
 		r.JSON(http.StatusOK, renderError(ErrDeviceNotOnline, err))
@@ -179,7 +179,13 @@ func SetDeviceStatus(urlparams martini.Params, req *http.Request, r render.Rende
 		return
 	}
 
-	status, err := c.MapToStatus(args.(map[string][]interface{}))
+	m, ok := args.(map[string]interface{})
+	if !ok {
+		r.JSON(http.StatusOK, renderError(ErrWrongStatusFormat, err))
+		return
+	}
+
+	status, err := c.MapToStatus(m)
 	if err != nil {
 		r.JSON(http.StatusOK, renderError(ErrWrongStatusFormat, err))
 		return
@@ -190,7 +196,7 @@ func SetDeviceStatus(urlparams martini.Params, req *http.Request, r render.Rende
 		Status:   status,
 	}
 	statusreply := rpcs.ReplySetStatus{}
-	err = server.RPCCallByName("controller", "Access.SetStatus", statusargs, &statusreply)
+	err = server.RPCCallByName("controller", "Controller.SetStatus", statusargs, &statusreply)
 	if err != nil {
 		server.Log.Errorf("set devie status error: %v", err)
 		r.JSON(http.StatusOK, renderError(ErrSystemFault, err))

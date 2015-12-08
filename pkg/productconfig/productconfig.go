@@ -3,6 +3,7 @@ package productconfig
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/PandoCloud/pando-cloud/pkg/protocol"
 	"github.com/PandoCloud/pando-cloud/pkg/tlv"
 )
@@ -95,10 +96,14 @@ func (config *ProductConfig) StatusToMap(status []protocol.SubData) (map[string]
 	return result, nil
 }
 
-func (config *ProductConfig) MapToStatus(data map[string][]interface{}) ([]protocol.SubData, error) {
+func (config *ProductConfig) MapToStatus(data map[string]interface{}) ([]protocol.SubData, error) {
 	result := []protocol.SubData{}
 
-	for label, params := range data {
+	for label, one := range data {
+		params, ok := one.([]interface{})
+		if !ok {
+			return nil, fmt.Errorf("status format error: %v", one)
+		}
 		obj, realParams, err := config.ValidateStatus(label, params)
 		if err != nil {
 			return nil, err

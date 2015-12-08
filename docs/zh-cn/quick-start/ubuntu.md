@@ -139,4 +139,4 @@ $GOPATH/bin/device
 
 也可以使用任何实现了[Pando嵌入式框架](https://github.com/PandoCloud/pando-embeded-framework)的设备进行测试。(登录地址改为本地http接入服务器地址)
 
-通过HTTP请求工具（如`curl`）向api服务器发送请求就可以测试读取、设置设备状态。
+通过HTTP请求工具（如`curl`）向api服务器发送请求就可以测试读取、设置设备状态。具体可参考[应用服务器API文档](../api-doc/application.md)

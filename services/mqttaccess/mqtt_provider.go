@@ -24,14 +24,16 @@ func (mp *MQTTProvider) ValidateDeviceToken(deviceid uint64, token []byte) error
 	}
 	return nil
 }
-func (mp *MQTTProvider) OnDeviceOnline(args rpcs.ArgsGetOnline) {
+func (mp *MQTTProvider) OnDeviceOnline(args rpcs.ArgsGetOnline) error {
 	reply := rpcs.ReplyGetOnline{}
 	err := server.RPCCallByName("devicemanager", "DeviceManager.GetOnline", args, &reply)
 	if err != nil {
 		server.Log.Errorf("device online error. args: %v, error: %v", args, err)
 	}
+
+	return err
 }
-func (mp *MQTTProvider) OnDeviceOffline(deviceid uint64) {
+func (mp *MQTTProvider) OnDeviceOffline(deviceid uint64) error {
 	args := rpcs.ArgsGetOffline{
 		Id: deviceid,
 	}
@@ -40,8 +42,10 @@ func (mp *MQTTProvider) OnDeviceOffline(deviceid uint64) {
 	if err != nil {
 		server.Log.Errorf("device offline error. deviceid: %v, error: %v", deviceid, err)
 	}
+
+	return err
 }
-func (mp *MQTTProvider) OnDeviceHeartBeat(deviceid uint64) {
+func (mp *MQTTProvider) OnDeviceHeartBeat(deviceid uint64) error {
 	args := rpcs.ArgsDeviceId{
 		Id: deviceid,
 	}
@@ -50,6 +54,7 @@ func (mp *MQTTProvider) OnDeviceHeartBeat(deviceid uint64) {
 	if err != nil {
 		server.Log.Errorf("device heartbeat error. deviceid: %v, error: %v", deviceid, err)
 	}
+	return err
 }
 func (mp *MQTTProvider) OnDeviceMessage(deviceid uint64, msgtype string, message []byte) {
 	server.Log.Infof("device {%v} message {%v} : %x", deviceid, msgtype, message)

@@ -68,8 +68,7 @@ func (m *Manager) PublishMessage2Device(deviceid uint64, msg *Publish, timeout t
 		return errorf("device not exist: %v", deviceid)
 	}
 
-	err := <-con.Publish(msg, timeout)
-	return err
+	return con.Publish(msg, timeout)
 }
 
 func (m *Manager) PublishMessage2Server(deviceid uint64, msg *Publish) error {

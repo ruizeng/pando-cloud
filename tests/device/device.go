@@ -5,8 +5,16 @@ import (
 	"encoding/json"
 	"fmt"
 	MQTT "git.eclipse.org/gitroot/paho/org.eclipse.paho.mqtt.golang.git"
+	"github.com/PandoCloud/pando-cloud/pkg/protocol"
+	"github.com/PandoCloud/pando-cloud/pkg/tlv"
+	"log"
+	"os"
 	"strings"
 	"time"
+)
+
+const (
+	commonCmdGetStatus = uint16(65528)
 )
 
 // device register args
@@ -72,6 +80,7 @@ type Device struct {
 }
 
 func NewDevice(url string, productkey string, code string, version string) *Device {
+
 	return &Device{
 		Url:        url,
 		ProductKey: productkey,
@@ -146,15 +155,104 @@ func (d *Device) DoLogin() error {
 	return nil
 }
 
+func (d *Device) reportStatus(client *MQTT.Client) {
+
+	payloadHead := protocol.DataHead{
+		Flag:      0,
+		Timestamp: uint64(time.Now().Unix() * 1000),
+	}
+	param := []interface{}{uint8(1)}
+	params, err := tlv.MakeTLVs(param)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	sub := protocol.SubData{
+		Head: protocol.SubDataHead{
+			SubDeviceid: uint16(1),
+			PropertyNum: uint16(1),
+			ParamsCount: uint16(len(params)),
+		},
+		Params: params,
+	}
+
+	status := protocol.Data{
+		Head:    payloadHead,
+		SubData: []protocol.SubData{},
+	}
+
+	status.SubData = append(status.SubData, sub)
+
+	payload, err := status.Marshal()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	deviceid := fmt.Sprint("%x", d.id)
+	client.Publish(deviceid+"/d", 1, false, payload)
+
+}
+
+func (d *Device) statusHandler(client *MQTT.Client, msg MQTT.Message) {
+	status := protocol.Data{}
+
+	err := status.UnMarshal(msg.Payload())
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Println("device receiving status set : ")
+
+	for _, one := range status.SubData {
+		fmt.Println("subdeviceid : ", one.Head.SubDeviceid)
+		fmt.Println("no : ", one.Head.PropertyNum)
+		fmt.Println("params : ", one.Params)
+	}
+}
+
+func (d *Device) commandHandler(client *MQTT.Client, msg MQTT.Message) {
+	cmd := protocol.Command{}
+
+	err := cmd.UnMarshal(msg.Payload())
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	switch cmd.Head.No {
+	case commonCmdGetStatus:
+		d.reportStatus(client)
+	default:
+		fmt.Println("unsuported command : %v", cmd.Head.No)
+	}
+}
+
 func (d *Device) messageHandler(client *MQTT.Client, msg MQTT.Message) {
 	fmt.Printf("TOPIC: %s\n", msg.Topic())
-	fmt.Printf("MSG: %s\n", msg.Payload())
-	topicPieces := strings.Split(msg.Topic())
+	fmt.Printf("MSG: %x\n", msg.Payload())
+	topicPieces := strings.Split(msg.Topic(), "/")
 	clientid := topicPieces[0]
 	msgtype := topicPieces[1]
+	fmt.Println(clientid, msgtype)
+
+	switch msgtype {
+	case "c":
+		d.commandHandler(client, msg)
+	case "d":
+		d.statusHandler(client, msg)
+	default:
+		fmt.Println("unsuported message type :", msgtype)
+	}
 }
 
 func (d *Device) DoAccess() error {
+	logger := log.New(os.Stdout, "", log.LstdFlags)
+	MQTT.ERROR = logger
+	MQTT.CRITICAL = logger
+	MQTT.WARN = logger
+	MQTT.DEBUG = logger
 
 	//create a ClientOptions struct setting the broker address, clientid, turn
 	//off trace output and set the default message handler

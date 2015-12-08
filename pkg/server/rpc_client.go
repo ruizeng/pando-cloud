@@ -29,16 +29,13 @@ func NewRPCClient() (*RPCClient, error) {
 func rpcCallWithReconnect(client *rpc.Client, addr string, serverMethod string, args interface{}, reply interface{}) error {
 	err := client.Call(serverMethod, args, reply)
 	if err == rpc.ErrShutdown {
+		Log.Warn("rpc connection shut down, trying to reconnect...")
 		client, err = rpc.Dial("tcp", addr)
 		if err != nil {
 			return err
 		}
-	} else if err == nil {
-		return nil
+		return client.Call(serverMethod, args, reply)
 	}
-
-	err = client.Call(serverMethod, args, reply)
-
 	return err
 }
 

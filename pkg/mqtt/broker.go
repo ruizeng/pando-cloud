@@ -10,7 +10,7 @@ type Broker struct {
 }
 
 func NewBroker(p Provider) *Broker {
-	// context
+	// manager
 	mgr := NewManager(p)
 
 	handler := &Broker{mgr: mgr}

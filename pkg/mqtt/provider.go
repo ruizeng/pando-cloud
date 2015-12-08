@@ -6,8 +6,8 @@ import (
 
 type Provider interface {
 	ValidateDeviceToken(deviceid uint64, token []byte) error
-	OnDeviceOnline(args rpcs.ArgsGetOnline)
-	OnDeviceOffline(deviceid uint64)
-	OnDeviceHeartBeat(deviceid uint64)
+	OnDeviceOnline(args rpcs.ArgsGetOnline) error
+	OnDeviceOffline(deviceid uint64) error
+	OnDeviceHeartBeat(deviceid uint64) error
 	OnDeviceMessage(deviceid uint64, msgtype string, message []byte)
 }

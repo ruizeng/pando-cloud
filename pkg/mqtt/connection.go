@@ -57,18 +57,21 @@ func (c *Connection) Submit(msg Message) {
 }
 
 // Publish will publish a message , and return a chan to wait for completion.
-func (c *Connection) Publish(msg Message, timeout time.Duration) chan error {
+func (c *Connection) Publish(msg Message, timeout time.Duration) error {
+	server.Log.Debugf("publishing message : %v, timeout %v", msg, timeout)
+
 	message := msg.(*Publish)
 	message.MessageId = c.MessageId
 	c.MessageId++
 	c.Submit(message)
+
+	ch := make(chan error)
 
 	// we don't wait for confirm.
 	if timeout == 0 {
 		return nil
 	}
 
-	ch := make(chan error)
 	c.MessageWaitChan[message.MessageId] = ch
 	// wait for timeout and
 	go func() {
@@ -82,7 +85,8 @@ func (c *Connection) Publish(msg Message, timeout time.Duration) chan error {
 		}
 	}()
 
-	return ch
+	err := <-ch
+	return err
 }
 
 func (c *Connection) confirmPublish(messageid uint16) {
@@ -183,6 +187,18 @@ func (c *Connection) RcvMsgFromClient() {
 				goto CLOSE
 			}
 
+			args := rpcs.ArgsGetOnline{
+				Id:                c.DeviceId,
+				ClientIP:          host,
+				AccessRPCHost:     server.GetRPCHost(),
+				HeartbeatInterval: uint32(c.KeepAlive),
+			}
+			err = c.Mgr.Provider.OnDeviceOnline(args)
+			if err != nil {
+				server.Log.Warn("device online error : %v", err)
+				goto CLOSE
+			}
+
 			c.Mgr.AddConn(c.DeviceId, c)
 			connack := &ConnAck{
 				ReturnCode: ret,
@@ -191,13 +207,6 @@ func (c *Connection) RcvMsgFromClient() {
 			c.Submit(connack)
 			c.KeepAlive = msg.KeepAliveTimer
 			server.Log.Infof("%s, connected to server now", host)
-			args := rpcs.ArgsGetOnline{
-				Id:                c.DeviceId,
-				ClientIP:          host,
-				AccessRPCHost:     server.GetRPCHost(),
-				HeartbeatInterval: uint32(c.KeepAlive),
-			}
-			c.Mgr.Provider.OnDeviceOnline(args)
 
 		case *Publish:
 			server.Log.Infof("%s, publish topic: %s", host, msg.TopicName)
@@ -235,8 +244,12 @@ func (c *Connection) RcvMsgFromClient() {
 			server.Log.Infof("%s, ping req comes", host)
 			c.LastHbTime = time.Now().Unix()
 			pingrsp := &PingResp{}
+			err := c.Mgr.Provider.OnDeviceHeartBeat(c.DeviceId)
+			if err != nil {
+				server.Log.Warnf("%s, heartbeat set error %s, close now...", host, err)
+				goto CLOSE
+			}
 			c.Submit(pingrsp)
-			c.Mgr.Provider.OnDeviceHeartBeat(c.DeviceId)
 
 		case *Subscribe:
 			server.Log.Infof("%s, subscribe topic: %v", host, msg.Topics)
@@ -250,7 +263,7 @@ func (c *Connection) RcvMsgFromClient() {
 			return
 
 		default:
-			server.Log.Error("unknown msg type %T", msg)
+			server.Log.Errorf("unknown msg type %T", msg)
 			c.Close()
 			return
 		}
@@ -266,14 +279,14 @@ func (c *Connection) SendMsgToClient() {
 	for {
 		msg, ok := <-c.SendChan
 		if !ok {
-			server.Log.Error("%s is end now", host)
+			server.Log.Errorf("%s is end now", host)
 			return
 		}
 
-		server.Log.Debug("send msg to %s=======\n%v\n=========", host, msg)
+		server.Log.Debugf("send msg to %s=======\n%v\n=========", host, msg)
 		err := msg.Encode(c.Conn)
 		if err != nil {
-			server.Log.Error("send msg err: %s=====\n%v\n=====", err, msg)
+			server.Log.Errorf("send msg err: %s=====\n%v\n=====", err, msg)
 			continue
 		}
 	}

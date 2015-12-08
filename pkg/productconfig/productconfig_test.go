@@ -87,7 +87,7 @@ func TestParseProductConfig(t *testing.T) {
 
 	t.Log(res)
 
-	m := make(map[string][]interface{})
+	m := make(map[string]interface{})
 	m["switch"] = []interface{}{float64(1)}
 	_, err = c.MapToStatus(m)
 	if err != nil {

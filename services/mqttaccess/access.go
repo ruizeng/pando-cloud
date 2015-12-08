@@ -61,9 +61,10 @@ func (a *Access) GetStatus(args rpcs.ArgsGetStatus, reply *rpcs.ReplyGetStatus) 
 
 	// then wait for status report
 	StatusChan[args.Id] = make(chan *protocol.Data)
-	timer := time.NewTimer(defaultTimeoutSecond * time.Second)
+	after := time.After(defaultTimeoutSecond * time.Second)
+	server.Log.Debug("now waiting 5 seconds for status report...")
 	select {
-	case <-timer.C:
+	case <-after:
 		// timeout
 		close(StatusChan[args.Id])
 		delete(StatusChan, args.Id)
