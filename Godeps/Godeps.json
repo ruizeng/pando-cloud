@@ -6,6 +6,11 @@
 	],
 	"Deps": [
 		{
+			"ImportPath": "git.eclipse.org/gitroot/paho/org.eclipse.paho.mqtt.golang.git",
+			"Comment": "v0.9.1-16-g755e3fc",
+			"Rev": "755e3fcf01e9787889db9a3272e33a75795e88ff"
+		},
+		{
 			"ImportPath": "github.com/Sirupsen/logrus",
 			"Comment": "v0.8.7-30-g4643a7e",
 			"Rev": "4643a7efec9b8fd7548882e7b30095711343100f"
@@ -17,18 +22,18 @@
 		},
 		{
 			"ImportPath": "github.com/coreos/etcd/client",
-			"Comment": "v2.3.0-alpha.0-90-gd435d44",
-			"Rev": "d435d443bb7659a2ff400c185fe5c6eea9fc81ed"
+			"Comment": "v2.3.0-alpha.0-151-g9220a47",
+			"Rev": "9220a47c3097f980d70a2982af4beeb990499662"
 		},
 		{
 			"ImportPath": "github.com/coreos/etcd/pkg/pathutil",
-			"Comment": "v2.3.0-alpha.0-90-gd435d44",
-			"Rev": "d435d443bb7659a2ff400c185fe5c6eea9fc81ed"
+			"Comment": "v2.3.0-alpha.0-151-g9220a47",
+			"Rev": "9220a47c3097f980d70a2982af4beeb990499662"
 		},
 		{
 			"ImportPath": "github.com/coreos/etcd/pkg/types",
-			"Comment": "v2.3.0-alpha.0-90-gd435d44",
-			"Rev": "d435d443bb7659a2ff400c185fe5c6eea9fc81ed"
+			"Comment": "v2.3.0-alpha.0-151-g9220a47",
+			"Rev": "9220a47c3097f980d70a2982af4beeb990499662"
 		},
 		{
 			"ImportPath": "github.com/garyburd/redigo/internal",
@@ -70,6 +75,10 @@
 			"Rev": "4e1c5567d7c2dd59fa4c7c83d34c2f3528b025d6"
 		},
 		{
+			"ImportPath": "github.com/pborman/uuid",
+			"Rev": "cccd189d45f7ac3368a0d127efb7f4d08ae0b655"
+		},
+		{
 			"ImportPath": "github.com/qor/inflection",
 			"Rev": "3272df6c21d04180007eb3349844c89a3856bc25"
 		},
@@ -79,7 +88,11 @@
 		},
 		{
 			"ImportPath": "golang.org/x/net/context",
-			"Rev": "2cba614e8ff920c60240d2677bc019af32ee04e5"
+			"Rev": "fa33dc7b893a6db61a44637ced689a85ee5208c4"
+		},
+		{
+			"ImportPath": "golang.org/x/net/websocket",
+			"Rev": "fa33dc7b893a6db61a44637ced689a85ee5208c4"
 		},
 		{
 			"ImportPath": "labix.org/v2/mgo",

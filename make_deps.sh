@@ -1,4 +1,4 @@
 #!/bin/sh
 
-# rm -rf ./Godeps 
+rm -rf ./Godeps 
 $GOPATH/bin/godep save ./...
