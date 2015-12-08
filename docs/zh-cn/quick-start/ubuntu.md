@@ -114,7 +114,12 @@ etcd &
 cd $GOPATH/src/github.com/PandoCloud/pando-cloud
 sh -x ./build/local/linux/run.sh
 ```
-如果没有打印异常信息，则证明顺利运行。
+
+查询进程，如果6个服务都启动，则证明顺利运行。
+
+```sh
+ps aux | grep $GOPATH/bin
+```
 
 ### 4. 配置
 平台提供命令行配置工具进行配置，安装方法：
