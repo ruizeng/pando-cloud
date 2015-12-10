@@ -11,6 +11,6 @@ $GOPATH/bin/registry -etcd http://localhost:2379 -rpchost localhost:20034 -aeske
 $GOPATH/bin/apiprovider -etcd http://localhost:2379 -loglevel debug  -httphost localhost:8888 &
 $GOPATH/bin/devicemanager -etcd http://localhost:2379 -loglevel debug  -rpchost localhost:20033 &
 $GOPATH/bin/controller -etcd http://localhost:2379 -loglevel debug  -rpchost localhost:20032 &
-$GOPATH/bin/mqttaccess -etcd http://localhost:2379 -loglevel debug  -rpchost localhost:20030 -tcphost localhost:1883&
+$GOPATH/bin/mqttaccess -etcd http://localhost:2379 -loglevel debug  -rpchost localhost:20030 -tcphost localhost:1883 &
 
 exit 0
