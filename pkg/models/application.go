@@ -18,7 +18,7 @@ type Application struct {
 	AppName string `sql:"type:varchar(200);"`
 	// desc
 	AppDescription string `sql:"type:text;"`
-	// app domain which allows wildcard string like "/*", "/vendors/12/*", "/products/10"
+	// app domain which allows wildcard string like "*", "vendor/12", "product/10"
 	AppDomain string `sql:"type:varchar(200);not null;"`
 
 	CreatedAt time.Time

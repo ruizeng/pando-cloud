@@ -19,6 +19,7 @@ func main() {
 	cmdHandler := NewCommandHander()
 	cmdHandler.SetHandler("vendor", DoVendorCommand)
 	cmdHandler.SetHandler("product", DoProductCommand)
+	cmdHandler.SetHandler("application", DoApplicationCommand)
 
 	reader := bufio.NewReader(os.Stdin)
 

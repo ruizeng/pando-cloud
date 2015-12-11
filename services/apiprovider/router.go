@@ -11,15 +11,15 @@ func route(m *martini.ClassicMartini) {
 	m.Get("/application/v1/device/info", GetDeviceInfoByKey)
 
 	// find a device by identifier
-	m.Get("/application/v1/devices/:identifier/info", GetDeviceInfoByIdentifier)
+	m.Get("/application/v1/devices/:identifier/info", ApplicationAuthOnDeviceIdentifer, GetDeviceInfoByIdentifier)
 
 	// get devie current status
-	m.Get("/application/v1/devices/:identifier/status/current", GetDeviceCurrentStatus)
+	m.Get("/application/v1/devices/:identifier/status/current", ApplicationAuthOnDeviceIdentifer, GetDeviceCurrentStatus)
 
 	// get devie latest status
-	m.Get("/application/v1/devices/:identifier/status/latest", GetDeviceLatestStatus)
+	m.Get("/application/v1/devices/:identifier/status/latest", ApplicationAuthOnDeviceIdentifer, GetDeviceLatestStatus)
 
 	// set devie status
-	m.Put("/application/v1/devices/:identifier/status", SetDeviceStatus)
+	m.Put("/application/v1/devices/:identifier/status", ApplicationAuthOnDeviceIdentifer, SetDeviceStatus)
 
 }
