@@ -19,6 +19,8 @@ const (
 	ErrDeviceNotOnline    = 10004
 	ErrWrongStatusFormat  = 10005
 	ErrWrongProductConfig = 10006
+	ErrWrongQueryFormat   = 10007
+	ErrAccessDenied       = 10008
 )
 
 func renderError(code int, err error) Common {

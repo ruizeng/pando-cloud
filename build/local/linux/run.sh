@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# init db
-echo 'CREATE DATABASE PandoCloud' | mysql -uroot 
-
 killall -9 httpaccess registry apiprovider devicemanager controller mqttaccess
 
 # start services

@@ -58,6 +58,40 @@ func testProduct(t *testing.T, r *Registry) {
 	}
 }
 
+func testApplication(t *testing.T, r *Registry) {
+	app := &models.Application{
+		AppToken:       "test-token",
+		ReportUrl:      "http://localhost://6060",
+		AppName:        "test",
+		AppDescription: "this is a test app",
+		AppDomain:      "/*",
+	}
+	err := r.SaveApplication(app, app)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(app)
+
+	app.AppName = "another desc."
+	err = r.SaveApplication(app, app)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(app)
+
+	reply := &models.Application{}
+	err = r.ValidateApplication(app.AppKey, reply)
+	if err != nil {
+		t.Error(err)
+	}
+	t.Log(reply)
+
+	err = r.ValidateApplication("this is a wrong key , you know", reply)
+	if err == nil {
+		t.Error("wrong key should fail product key validation.")
+	}
+}
+
 func testDevice(t *testing.T, r *Registry) {
 	args := &rpcs.ArgsDeviceRegister{
 		ProductKey:    testProductKey,
@@ -118,5 +152,6 @@ func TestRegistry(t *testing.T) {
 
 	testVendor(t, r)
 	testProduct(t, r)
+	testApplication(t, r)
 	testDevice(t, r)
 }

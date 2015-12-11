@@ -99,6 +99,69 @@ func (r *Registry) SaveProduct(product *models.Product, reply *models.Product) e
 	return nil
 }
 
+// SaveApplication will create a application if the ID field is not initialized
+// if ID field is initialized, it will update the conresponding application.
+func (r *Registry) SaveApplication(app *models.Application, reply *models.Application) error {
+	db, err := getDB()
+	if err != nil {
+		return err
+	}
+
+	err = db.Save(app).Error
+	if err != nil {
+		return err
+	}
+
+	key, err := r.keygen.GenRandomKey(int64(app.ID))
+	if err != nil {
+		return err
+	}
+
+	app.AppKey = key
+
+	err = db.Save(app).Error
+	if err != nil {
+		return err
+	}
+
+	reply.ID = app.ID
+	reply.AppName = app.AppName
+	reply.AppDescription = app.AppDescription
+	reply.AppKey = app.AppKey
+	reply.ReportUrl = app.ReportUrl
+	reply.AppToken = app.AppToken
+	reply.AppDomain = app.AppDomain
+	reply.CreatedAt = app.CreatedAt
+	reply.UpdatedAt = app.UpdatedAt
+
+	return nil
+}
+
+// ValidateApplication try to validate the given app key.
+// if success, it will reply the corresponding application
+func (r *Registry) ValidateApplication(key string, reply *models.Application) error {
+	db, err := getDB()
+	if err != nil {
+		return err
+	}
+
+	id, err := r.keygen.DecodeIdFromRandomKey(key)
+	if err != nil {
+		return err
+	}
+
+	err = db.First(reply, id).Error
+	if err != nil {
+		return err
+	}
+
+	if reply.AppKey != key {
+		return errors.New("app key not match.")
+	}
+
+	return nil
+}
+
 // FindProduct will find product by specified ID
 func (r *Registry) FindProduct(id int32, reply *models.Product) error {
 	db, err := getDB()
