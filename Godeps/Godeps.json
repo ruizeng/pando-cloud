@@ -12,8 +12,8 @@
 		},
 		{
 			"ImportPath": "github.com/Sirupsen/logrus",
-			"Comment": "v0.8.7-30-g4643a7e",
-			"Rev": "4643a7efec9b8fd7548882e7b30095711343100f"
+			"Comment": "v0.8.7-53-g446d1c1",
+			"Rev": "446d1c146faa8ed3f4218f056fcd165f6bcfda81"
 		},
 		{
 			"ImportPath": "github.com/codegangsta/inject",
