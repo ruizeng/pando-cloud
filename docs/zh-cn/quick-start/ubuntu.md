@@ -122,12 +122,7 @@ ps aux | grep $GOPATH/bin
 ```
 
 ### 4. 配置
-平台提供命令行配置工具进行配置，安装方法：
-```sh
-go install github.com/PandoCloud/pando-cloud/tools/pdcfg
-```
-
-详细使用方法请参考[配置工具](../tools/pdcfg.md)
+平台提供命令行配置工具进行配置，详细使用方法请参考[配置工具](../tools/pdcfg.md)
 
 
 ### 5. 测试

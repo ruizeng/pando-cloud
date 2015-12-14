@@ -39,7 +39,7 @@ func main() {
 		cmd := fragments[0]
 		handler, err := cmdHandler.GetHandler(cmd)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Printf("Error: %v \n", err)
 			continue
 		}
 

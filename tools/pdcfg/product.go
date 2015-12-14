@@ -1,43 +1,98 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"github.com/PandoCloud/pando-cloud/pkg/models"
+	"github.com/PandoCloud/pando-cloud/pkg/productconfig"
 	"github.com/PandoCloud/pando-cloud/pkg/server"
+	"io/ioutil"
+	"os"
 	"strconv"
+	"strings"
 )
+
+func addProduct() error {
+	args := models.Product{}
+
+	reader := bufio.NewReader(os.Stdin)
+
+	fmt.Printf("vendor ID: ")
+	id, err := reader.ReadString('\n')
+	if err != nil {
+		return err
+	}
+	vendor := strings.Replace(id, "\n", "", -1)
+	vendorid, err := strconv.Atoi(vendor)
+	if err != nil {
+		return err
+	}
+	args.VendorID = int32(vendorid)
+
+	fmt.Printf("product name: ")
+	name, err := reader.ReadString('\n')
+	if err != nil {
+		return err
+	}
+	args.ProductName = strings.Replace(name, "\n", "", -1)
+
+	fmt.Printf("product description: ")
+	desc, err := reader.ReadString('\n')
+	if err != nil {
+		return err
+	}
+	args.ProductDescription = strings.Replace(desc, "\n", "", -1)
+
+	fmt.Printf("product config json file: ")
+	file, err := reader.ReadString('\n')
+	if err != nil {
+		return err
+	}
+	jsonfile := strings.Replace(file, "\n", "", -1)
+	fi, err := os.Open(jsonfile)
+	if err != nil {
+		return err
+	}
+	content, err := ioutil.ReadAll(fi)
+	config := string(content)
+	fi.Close()
+	_, err = productconfig.New(config)
+	if err != nil {
+		return err
+	}
+	args.ProductConfig = config
+
+	reply := &models.Product{}
+
+	err = server.RPCCallByName("registry", "Registry.SaveProduct", &args, reply)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("=======> product created successfully:")
+	printStruct(reply)
+	fmt.Println("=======")
+
+	return nil
+}
 
 func DoProductCommand(args []string) error {
 	if len(args) < 1 {
 		return errors.New("command arguments not enough!")
 	}
 
-	op := args[0]
+	op := strings.Replace(args[0], "\n", "", -1)
 
 	switch op {
 	case "add":
-		if len(args) != 3 {
-			return errors.New("wrong command arguments, example:  product add vendorid productname")
+		if len(args) > 1 {
+			return errors.New("unnecessary command arguments. just type 'product add'")
 		}
-		vendorid, err := strconv.Atoi(args[1])
+		err := addProduct()
 		if err != nil {
 			return err
 		}
-		args := models.Product{
-			VendorID:    int32(vendorid),
-			ProductName: args[2],
-		}
-		reply := models.Product{}
-
-		err = server.RPCCallByName("registry", "Registry.SaveProduct", &args, &reply)
-		if err != nil {
-			return err
-		}
-
-		fmt.Println("=======> product created successfully.")
-		fmt.Printf("product id: %d\n", reply.ID)
-		fmt.Printf("product key: %s\n", reply.ProductKey)
 	default:
 		return errors.New("operation not suported:" + op)
 	}
