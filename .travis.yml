@@ -5,12 +5,11 @@ services:
   - redis-server
   - mongodb
 before_install:
-  - go get github.com/tools/godep
   - go get github.com/modocache/gover
   - go get github.com/mattn/goveralls
   - go get github.com/coreos/etcd
 install:
-  - $HOME/gopath/bin/godep restore 
+  - go get ./... 
 before_script:
   - $HOME/gopath/bin/etcd &
   - echo 'CREATE DATABASE PandoCloud' | mysql -uroot
