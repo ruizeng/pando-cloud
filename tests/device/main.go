@@ -7,10 +7,17 @@ import (
 
 var (
 	TestUrl        = flag.String("url", "https://localhost", "login url")
-	TestProductKey = flag.String("productkey", "aec003c9018b9a572ceb19720e589c375ead1a2b1fbd0d089d067128611754ff", "product key")
+	TestProductKey = flag.String("productkey", "", "product key")
 )
 
 func main() {
+	flag.Parse()
+
+	if *TestProductKey == "" {
+		fmt.Println("product key not provided. use -productkey flag")
+		return
+	}
+
 	dev := NewDevice(*TestUrl, *TestProductKey, "ffe34e", "version")
 
 	err := dev.DoRegister()

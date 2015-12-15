@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -256,13 +257,14 @@ func (d *Device) DoAccess() error {
 
 	//create a ClientOptions struct setting the broker address, clientid, turn
 	//off trace output and set the default message handler
-	opts := MQTT.NewClientOptions().AddBroker("tcp://" + d.access)
+	opts := MQTT.NewClientOptions().AddBroker("tls://" + d.access)
 	clientid := fmt.Sprintf("%x", d.id)
 	opts.SetClientID(clientid)
 	opts.SetUsername(clientid) // clientid as username
 	opts.SetPassword(hex.EncodeToString(d.token))
 	opts.SetKeepAlive(30 * time.Second)
 	opts.SetDefaultPublishHandler(d.messageHandler)
+	opts.SetTLSConfig(&tls.Config{Certificates: nil, InsecureSkipVerify: true})
 
 	//create and start a client using the above ClientOptions
 	c := MQTT.NewClient(opts)

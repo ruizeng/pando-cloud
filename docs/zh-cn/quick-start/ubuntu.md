@@ -131,7 +131,7 @@ etcd &
 
 ```sh
 cd $GOPATH/src/github.com/PandoCloud/pando-cloud
-sh -x ./build/local/linux/run.sh
+sudo sh -x ./build/local/linux/run.sh
 ```
 
 查询进程，如果6个服务都启动，则证明顺利运行。
@@ -139,6 +139,10 @@ sh -x ./build/local/linux/run.sh
 ```sh
 ps aux | grep $GOPATH/bin
 ```
+
+> 说明：`run.sh`脚本默认将本服务器的内外网ip的443端口（https默认端口）作为设备登陆的监听端口，将本地（`localhost`）地址的8888端口作为api接口服务的监听端口（默认情况api服务只能本机访问，如果需要通过外网访问，需要去掉httphost参数中的`localhost`）。
+
+如果需要自定义各服务的启动参数，请参考[服务部署指南](../services/README.md)
 
 ### 4. 配置
 平台提供命令行配置工具进行配置，详细使用方法请参考[配置工具](../tools/pdcfg.md)
