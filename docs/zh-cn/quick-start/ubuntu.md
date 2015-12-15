@@ -69,6 +69,25 @@ sudo apt-get install mysql-server -y
 
 > 安装过程中会弹出设置root账号密码，如果只是单机体验，可以不设置，直接回车。
 
+mysql安装完成后，请登录数据库并创建名为PandoCloud的数据库，如（无root密码）:
+
+```sh
+mysql -uroot
+```
+
+如果安装mysql时设置了root密码，则还需增加密码参数，如：
+
+```sh
+mysql -uroot -pyourpassword
+```
+
+进入后通过SQL创建数据库：
+
+```sql
+CREATE DATABASE PandoCloud;
+```
+**注意**：请确保数据库创建成功，否则无法正常启动registry服务。
+
 #### Redis
 
 ```sh
