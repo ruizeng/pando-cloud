@@ -12,7 +12,7 @@ Ubuntu是基于Linux的操作系统发行版。
 ## 说明
 如果不想自己编译二进制程序，可以使用我们预先编译好的二进制包。
 
-所有版本的二进制包在**[这里](https://github.com/PandoCloud/pando-cloud/releases)**发布和维护，选择适合自己系统的二进制包下载并解压，**不再需要编译**，直接参考[部署](#部署)说明进行部署。
+所有版本的二进制包在**[GitHub Release](https://github.com/PandoCloud/pando-cloud/releases)**或者[百度网盘（国内推荐）](http://pan.baidu.com/s/1hqLlLFA)发布和维护，选择适合自己系统的二进制包下载并解压，**不再需要编译**，直接参考[部署](#部署)说明进行部署。
 
 ## 编译
 

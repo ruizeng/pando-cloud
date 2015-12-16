@@ -55,13 +55,16 @@ func (mgr *ServerManager) RegisterServer() error {
 	var response *client.Response
 	opt := &client.SetOptions{TTL: 180 * time.Second}
 	if serverInstance.tcpsvr != nil {
-		response, err = kapi.Set(context.Background(), prefix+FlagTCPHost+"/"+*confTCPHost, *confTCPHost, opt)
+		addr, _ := fixHostIp(*confTCPHost)
+		response, err = kapi.Set(context.Background(), prefix+FlagTCPHost+"/"+addr, addr, opt)
 	}
 	if serverInstance.rpcsvr != nil {
-		response, err = kapi.Set(context.Background(), prefix+FlagRPCHost+"/"+*confRPCHost, *confRPCHost, opt)
+		addr, _ := fixHostIp(*confRPCHost)
+		response, err = kapi.Set(context.Background(), prefix+FlagRPCHost+"/"+addr, addr, opt)
 	}
 	if serverInstance.httpsvr != nil {
-		response, err = kapi.Set(context.Background(), prefix+FlagHTTPHost+"/"+*confHTTPHost, *confHTTPHost, opt)
+		addr, _ := fixHostIp(*confHTTPHost)
+		response, err = kapi.Set(context.Background(), prefix+FlagHTTPHost+"/"+addr, addr, opt)
 	}
 	if err != nil {
 		return err

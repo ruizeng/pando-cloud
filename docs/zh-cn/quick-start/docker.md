@@ -7,4 +7,19 @@
 ## 依赖
 Docker是跨平台的容器管理工具，在Linux，OSX以及Windows上运行。您需要先再自己的系统中[安装Docker引擎](https://docs.docker.com/engine/installation/)。安装好Docker后不再需要安装其他环境。
 
-## 
+## 执行启动脚本
+
+我们提供了脚本在单机环境启动平台：
+
+```sh
+sudo sh -x ./build/local/docker/run.sh
+
+```
+
+首次运行需要下载镜像，需要较长时间，请耐心等待。
+
+通过docker命令查看所有容器是否正常启动：
+
+```
+sudo docker ps -a
+```
