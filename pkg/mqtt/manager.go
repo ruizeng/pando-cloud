@@ -2,7 +2,6 @@ package mqtt
 
 import (
 	"net"
-	"strings"
 	"sync"
 	"time"
 )
