@@ -29,13 +29,15 @@ func (hs *HTTPServer) Start() error {
 
 	Log.Infof("HTTP Server Listen on %s, use https: %v", hs.addr, hs.useHttps)
 	go func() {
+		var err error
 		if hs.useHttps == false {
-			http.ListenAndServe(hs.addr, hs.handler)
+			err = http.ListenAndServe(hs.addr, hs.handler)
 		} else {
-			err := http.ListenAndServeTLS(hs.addr, *confCAFile, *confKeyFile, hs.handler)
-			if err != nil {
-				Log.Fatal(err.Error())
-			}
+			err = http.ListenAndServeTLS(hs.addr, *confCAFile, *confKeyFile, hs.handler)
+		}
+
+		if err != nil {
+			Log.Fatal(err.Error())
 		}
 	}()
 

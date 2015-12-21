@@ -160,13 +160,17 @@ func (c *Connection) RcvMsgFromClient() {
 			}
 
 			if len(msg.ClientId) < 1 || len(msg.ClientId) > 23 {
+				server.Log.Warn("invalid clientid length: %d", len(msg.ClientId))
 				ret = RetCodeIdentifierRejected
+				c.Close()
+				return
 			}
 
 			deviceid, err := ClientIdToDeviceId(msg.ClientId)
 			if err != nil {
 				server.Log.Warn("invalid Identify: %d", ret)
-				goto CLOSE
+				c.Close()
+				return
 			}
 			c.DeviceId = deviceid
 
@@ -174,17 +178,21 @@ func (c *Connection) RcvMsgFromClient() {
 			if err != nil {
 				server.Log.Warn("token format error : %v", err)
 				ret = RetCodeNotAuthorized
-				goto CLOSE
+				c.Close()
+				return
 			}
 			err = c.ValidateToken(token)
 			if err != nil {
 				server.Log.Warn("validate token error : %v", err)
 				ret = RetCodeNotAuthorized
+				c.Close()
+				return
 			}
 
 			if ret != RetCodeAccepted {
 				server.Log.Warn("invalid CON: %d", ret)
-				goto CLOSE
+				c.Close()
+				return
 			}
 
 			args := rpcs.ArgsGetOnline{
@@ -196,7 +204,8 @@ func (c *Connection) RcvMsgFromClient() {
 			err = c.Mgr.Provider.OnDeviceOnline(args)
 			if err != nil {
 				server.Log.Warn("device online error : %v", err)
-				goto CLOSE
+				c.Close()
+				return
 			}
 
 			c.Mgr.AddConn(c.DeviceId, c)
@@ -255,7 +264,8 @@ func (c *Connection) RcvMsgFromClient() {
 			err := c.Mgr.Provider.OnDeviceHeartBeat(c.DeviceId)
 			if err != nil {
 				server.Log.Warnf("%s, heartbeat set error %s, close now...", host, err)
-				goto CLOSE
+				c.Close()
+				return
 			}
 			c.Submit(pingrsp)
 
@@ -276,9 +286,6 @@ func (c *Connection) RcvMsgFromClient() {
 			return
 		}
 	}
-
-CLOSE:
-	c.Close()
 
 }
 

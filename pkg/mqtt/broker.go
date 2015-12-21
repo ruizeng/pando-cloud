@@ -25,7 +25,7 @@ func (b *Broker) Handle(conn net.Conn) {
 func (b *Broker) SendMessageToDevice(deviceid uint64, msgtype string, message []byte, timeout time.Duration) error {
 	msg := &Publish{}
 	msg.Header.QosLevel = QosAtLeastOnce
-	msg.TopicName = DeviceIdToClientId(deviceid) + "/" + msgtype
+	msg.TopicName = msgtype
 	msg.Payload = BytesPayload(message)
 	return b.mgr.PublishMessage2Device(deviceid, msg, timeout)
 }

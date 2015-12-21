@@ -73,11 +73,10 @@ func (m *Manager) PublishMessage2Device(deviceid uint64, msg *Publish, timeout t
 
 func (m *Manager) PublishMessage2Server(deviceid uint64, msg *Publish) error {
 	topic := msg.TopicName
-	msgtype := strings.Join(strings.Split(topic, "/")[1:], "/")
 
 	payload := msg.Payload.(BytesPayload)
 
-	m.Provider.OnDeviceMessage(deviceid, msgtype, payload)
+	m.Provider.OnDeviceMessage(deviceid, topic, payload)
 	return nil
 }
 

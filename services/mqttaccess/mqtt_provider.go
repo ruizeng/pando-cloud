@@ -21,6 +21,7 @@ func (mp *MQTTProvider) ValidateDeviceToken(deviceid uint64, token []byte) error
 	err := server.RPCCallByName("devicemanager", "DeviceManager.ValidateDeviceAccessToken", args, &reply)
 	if err != nil {
 		server.Log.Errorf("validate device token error. deviceid : %v, token : %v, error: %v", deviceid, token, err)
+		return err
 	}
 	return nil
 }
