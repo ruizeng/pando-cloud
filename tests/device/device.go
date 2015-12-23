@@ -241,7 +241,7 @@ func (d *Device) messageHandler(client *MQTT.Client, msg MQTT.Message) {
 	switch msgtype {
 	case "c":
 		d.commandHandler(client, msg)
-	case "d":
+	case "s":
 		d.statusHandler(client, msg)
 	default:
 		fmt.Println("unsuported message type :", msgtype)
