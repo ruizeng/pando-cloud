@@ -35,7 +35,7 @@ func GetDeviceInfoByKey(params martini.Params, req *http.Request, r render.Rende
 	key := req.URL.Query().Get("device_key")
 	server.Log.Printf("ACTION GetDeviceInfoByKey, key:: %v", key)
 	device := &models.Device{}
-	err := server.RPCCallByName("registry", "Registry.FindDeviceByKey", key, device)
+	err := server.RPCCallByName("registry", "Registry.ValidateDevice", key, device)
 	if err != nil {
 		r.JSON(http.StatusOK, renderError(ErrDeviceNotFound, err))
 		return
