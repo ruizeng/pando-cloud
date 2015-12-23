@@ -60,7 +60,8 @@ func (mp *MQTTProvider) OnDeviceHeartBeat(deviceid uint64) error {
 func (mp *MQTTProvider) OnDeviceMessage(deviceid uint64, msgtype string, message []byte) {
 	server.Log.Infof("device {%v} message {%v} : %x", deviceid, msgtype, message)
 	switch msgtype {
-	case "d":
+	case "s":
+		// it's a status
 		data := &protocol.Data{}
 		err := data.UnMarshal(message)
 		if err != nil {
@@ -87,6 +88,7 @@ func (mp *MQTTProvider) OnDeviceMessage(deviceid uint64, msgtype string, message
 			return
 		}
 	case "e":
+		// it's an event report
 		event := &protocol.Event{}
 		err := event.UnMarshal(message)
 		if err != nil {

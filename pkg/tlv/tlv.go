@@ -20,7 +20,7 @@ const (
 	TLV_UINT32  = 9
 	TLV_UINT64  = 10
 	TLV_BYTES   = 11
-	TLV_URI     = 12
+	TLV_STRING  = 12
 	TLV_BOOL    = 13
 )
 
@@ -78,7 +78,7 @@ func (tlv *TLV) Length() int {
 	case TLV_BYTES:
 		length = int(ByteToUint16(tlv.Value[0:2]))
 		length += 2
-	case TLV_URI:
+	case TLV_STRING:
 		length = int(ByteToUint16(tlv.Value[0:2]))
 		length += 2
 	default:
@@ -139,7 +139,7 @@ func (tlv *TLV) FromBinary(r io.Reader) error {
 		tlv.Value = make([]byte, length+2)
 		copy(tlv.Value[0:2], Uint16ToByte(length))
 		binary.Read(r, binary.BigEndian, tlv.Value[2:])
-	case TLV_URI:
+	case TLV_STRING:
 		binary.Read(r, binary.BigEndian, &length)
 		tlv.Value = make([]byte, length+2)
 		copy(tlv.Value[0:2], Uint16ToByte(length))
@@ -202,7 +202,7 @@ func MakeTLV(a interface{}) (*TLV, error) {
 		binary.Write(buf, binary.BigEndian, length)
 		binary.Write(buf, binary.BigEndian, a.([]byte))
 	case string:
-		tag = TLV_URI
+		tag = TLV_STRING
 		length = uint16(len(a.(string)))
 		binary.Write(buf, binary.BigEndian, length)
 		binary.Write(buf, binary.BigEndian, []byte(a.(string)))
@@ -277,7 +277,7 @@ func ReadTLV(tlv *TLV) (interface{}, error) {
 		retvar := make([]byte, length)
 		err = binary.Read(buffer, binary.BigEndian, &retvar)
 		return retvar, err
-	case TLV_URI:
+	case TLV_STRING:
 		err := binary.Read(buffer, binary.BigEndian, &length)
 		if err != nil {
 			return string([]byte{}), err
@@ -338,7 +338,7 @@ func CastTLV(value interface{}, valueType int32) interface{} {
 		return uint64(value.(float64))
 	case TLV_BYTES:
 		return []byte(value.(string))
-	case TLV_URI:
+	case TLV_STRING:
 		return value.(string)
 	default:
 		return nil

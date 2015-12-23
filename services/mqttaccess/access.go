@@ -40,7 +40,7 @@ func (a *Access) SetStatus(args rpcs.ArgsSetStatus, reply *rpcs.ReplySetStatus) 
 	if err != nil {
 		return err
 	}
-	return a.MqttBroker.SendMessageToDevice(args.DeviceId, "d", msg, defaultTimeoutSecond*time.Second)
+	return a.MqttBroker.SendMessageToDevice(args.DeviceId, "s", msg, defaultTimeoutSecond*time.Second)
 }
 
 func (a *Access) GetStatus(args rpcs.ArgsGetStatus, reply *rpcs.ReplyGetStatus) error {
