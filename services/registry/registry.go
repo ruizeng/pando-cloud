@@ -285,20 +285,22 @@ func (r *Registry) FindDeviceById(id int64, reply *models.Device) error {
 	return nil
 }
 
-// FindDevieByKey will find the device with given device key
-func (r *Registry) FindDeviceByKey(key string, reply *models.Device) error {
-	db, err := getDB()
+// ValidateDevice will validate a device key and return the model if success.
+func (r *Registry) ValidateDevice(key string, device *models.Device) error {
+	id, err := r.keygen.DecodeIdFromRandomKey(key)
 	if err != nil {
 		return err
 	}
 
-	err = db.Where(&models.Device{
-		DeviceKey: key,
-	}).First(reply).Error
-
+	err = r.FindDeviceById(id, device)
 	if err != nil {
 		return err
 	}
+
+	if device.DeviceKey != key {
+		return errors.New("device key not match.")
+	}
+
 	return nil
 }
 
