@@ -104,7 +104,7 @@ func TestStatus(t *testing.T) {
 		gets++
 	}
 	t.Logf("gets:%v, hits:%v, maxSize:%v, currentSize:%v", gets, hits, maxSize, currentSize)
-	status := cache.Status().(*MemCacheStatus)
+	status := cache.Status()
 	if status.CurrentSize != currentSize || status.MaxItemSize != maxSize ||
 		status.Gets != gets || status.Hits != hits {
 		t.Fatalf("get status maxSize:%v, currentSize:%v, nget:%v, nhit:%v",
@@ -121,7 +121,7 @@ func TestLRU(t *testing.T) {
 	for i, key := range keys {
 		cache.Set(key, 1234)
 		if i == 3 {
-			status := cache.Status().(*MemCacheStatus)
+			status := cache.Status()
 			if status.CurrentSize != maxSize {
 				t.Fatalf("expected maxSize %v,currentSize:%v", maxSize, status.CurrentSize)
 			}
@@ -134,7 +134,7 @@ func TestLRU(t *testing.T) {
 		}
 	}
 
-	status := cache.Status().(*MemCacheStatus)
+	status := cache.Status()
 	if status.CurrentSize != maxSize {
 		t.Fatalf("expected maxSize %v,currentSize:%v", maxSize, status.CurrentSize)
 	}

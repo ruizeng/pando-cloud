@@ -19,14 +19,6 @@ type MemCache struct {
 	hits, gets  AtomicInt
 }
 
-// MemCacheStatus return status of chache
-type MemCacheStatus struct {
-	Gets        int64
-	Hits        int64
-	MaxItemSize int
-	CurrentSize int
-}
-
 type entry struct {
 	key   interface{}
 	value interface{}
@@ -43,10 +35,10 @@ func NewMemCache(maxItemSize int) *MemCache {
 }
 
 //return the status of cache
-func (c *MemCache) Status() interface{} {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-	return &MemCacheStatus{
+func (c *MemCache) Status() *CacheStatus{
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
+	return &CacheStatus{
 		MaxItemSize: c.maxItemSize,
 		CurrentSize: c.cacheList.Len(),
 		Gets:        c.gets.Get(),
@@ -55,15 +47,15 @@ func (c *MemCache) Status() interface{} {
 }
 
 //get value with key
-func (c *MemCache) Get(key interface{}) (value interface{}, ok bool) {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
+func (c *MemCache) Get(key interface{}) (interface{}, bool) {
+	c.mutex.RLock()
+	defer c.mutex.RUnlock()
 	c.gets.Add(1)
 	if ele, hit := c.cache[key]; hit {
 		c.hits.Add(1)
 		return ele.Value.(*entry).value, true
 	}
-	return
+	return nil, false
 }
 
 //set a value with key
