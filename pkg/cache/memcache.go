@@ -47,7 +47,7 @@ func (c *MemCache) Status() *CacheStatus{
 }
 
 //get value with key
-func (c *MemCache) Get(key interface{}) (interface{}, bool) {
+func (c *MemCache) Get(key string) (interface{}, bool) {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 	c.gets.Add(1)
@@ -59,7 +59,7 @@ func (c *MemCache) Get(key interface{}) (interface{}, bool) {
 }
 
 //set a value with key
-func (c *MemCache) Set(key, value interface{}) {
+func (c *MemCache) Set(key string, value interface{}) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	if c.cache == nil {
@@ -80,7 +80,7 @@ func (c *MemCache) Set(key, value interface{}) {
 	}
 }
 
-func (c *MemCache) Delete(key interface{}) {
+func (c *MemCache) Delete(key string) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	if c.cache == nil {

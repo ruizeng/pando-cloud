@@ -12,8 +12,8 @@ type CacheStatus struct {
 
 //this is a interface which defines some common functions
 type Cache interface{
-	Set(key interface{}, value interface{})
-	Get(key interface{}) (interface{}, bool)
-	Delete(key interface{})
+	Set(key string, value interface{})
+	Get(key string) (interface{}, bool)
+	Delete(key string)
 	Status()(*CacheStatus)
 }
