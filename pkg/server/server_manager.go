@@ -14,8 +14,8 @@ import (
 const (
 	EtcdServersPrefix    = "/pando/servers/"
 	EtcdServersPrefixCnt = 2
-	EnvTCPProxy          = "TCP_PROXY"
-	EnvHTTPProxy         = "HTTP_PROXY"
+	EnvTCPProxy          = "TCP_PROXY_ADDR"
+	EnvHTTPProxy         = "HTTP_PROXY_ADDR"
 )
 
 type ServerManager struct {
