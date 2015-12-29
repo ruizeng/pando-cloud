@@ -10,7 +10,6 @@ import (
 	"github.com/PandoCloud/pando-cloud/pkg/tlv"
 	"log"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -190,8 +189,7 @@ func (d *Device) reportStatus(client *MQTT.Client) {
 		return
 	}
 
-	deviceid := fmt.Sprint("%x", d.id)
-	client.Publish(deviceid+"/d", 1, false, payload)
+	client.Publish("d", 1, false, payload)
 
 }
 
@@ -233,10 +231,8 @@ func (d *Device) commandHandler(client *MQTT.Client, msg MQTT.Message) {
 func (d *Device) messageHandler(client *MQTT.Client, msg MQTT.Message) {
 	fmt.Printf("TOPIC: %s\n", msg.Topic())
 	fmt.Printf("MSG: %x\n", msg.Payload())
-	topicPieces := strings.Split(msg.Topic(), "/")
-	clientid := topicPieces[0]
-	msgtype := topicPieces[1]
-	fmt.Println(clientid, msgtype)
+	msgtype := msg.Topic()
+	fmt.Println(msgtype)
 
 	switch msgtype {
 	case "c":
