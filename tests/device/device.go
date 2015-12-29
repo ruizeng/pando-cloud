@@ -189,7 +189,7 @@ func (d *Device) reportStatus(client *MQTT.Client) {
 		return
 	}
 
-	client.Publish("d", 1, false, payload)
+	client.Publish("s", 1, false, payload)
 
 }
 
