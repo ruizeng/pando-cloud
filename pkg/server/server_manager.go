@@ -6,6 +6,7 @@ import (
 	"errors"
 	"github.com/coreos/etcd/client"
 	"golang.org/x/net/context"
+	"os"
 	"strings"
 	"time"
 )
@@ -13,6 +14,8 @@ import (
 const (
 	EtcdServersPrefix    = "/pando/servers/"
 	EtcdServersPrefixCnt = 2
+	EnvTCPProxy          = "TCP_PROXY_ADDR"
+	EnvHTTPProxy         = "HTTP_PROXY_ADDR"
 )
 
 type ServerManager struct {
@@ -53,9 +56,12 @@ func (mgr *ServerManager) RegisterServer() error {
 	kapi := client.NewKeysAPI(c)
 	prefix := EtcdServersPrefix + mgr.serverName + "/"
 	var response *client.Response
-	opt := &client.SetOptions{TTL: 180 * time.Second}
+	opt := &client.SetOptions{TTL: 90 * time.Second}
 	if serverInstance.tcpsvr != nil {
-		addr, _ := fixHostIp(*confTCPHost)
+		addr := os.Getenv(EnvTCPProxy)
+		if addr == "" {
+			addr, _ = fixHostIp(*confTCPHost)
+		}
 		response, err = kapi.Set(context.Background(), prefix+FlagTCPHost+"/"+addr, addr, opt)
 	}
 	if serverInstance.rpcsvr != nil {
@@ -63,7 +69,10 @@ func (mgr *ServerManager) RegisterServer() error {
 		response, err = kapi.Set(context.Background(), prefix+FlagRPCHost+"/"+addr, addr, opt)
 	}
 	if serverInstance.httpsvr != nil {
-		addr, _ := fixHostIp(*confHTTPHost)
+		addr := os.Getenv(EnvHTTPProxy)
+		if addr == "" {
+			addr, _ = fixHostIp(*confHTTPHost)
+		}
 		response, err = kapi.Set(context.Background(), prefix+FlagHTTPHost+"/"+addr, addr, opt)
 	}
 	if err != nil {
