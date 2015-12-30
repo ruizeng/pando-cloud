@@ -5,9 +5,7 @@ import (
 	"errors"
 	"github.com/PandoCloud/pando-cloud/pkg/rpcs"
 	"github.com/PandoCloud/pando-cloud/pkg/server"
-	"io"
 	"net"
-	"strings"
 	"time"
 )
 
@@ -111,16 +109,15 @@ func (c *Connection) ValidateToken(token []byte) error {
 }
 
 func (c *Connection) Close() {
-	c.Mgr.DelConn(c.DeviceId)
+	deviceid := c.DeviceId
 	if c.Conn != nil {
 		c.Conn.Close()
-		c.Conn = nil
 	}
 	if c.SendChan != nil {
 		close(c.SendChan)
-		c.SendChan = nil
 	}
-	c.Mgr.Provider.OnDeviceOffline(c.DeviceId)
+	c.Mgr.DelConn(deviceid)
+	c.Mgr.Provider.OnDeviceOffline(deviceid)
 }
 
 func (c *Connection) RcvMsgFromClient() {
@@ -130,19 +127,8 @@ func (c *Connection) RcvMsgFromClient() {
 	for {
 		msg, err := DecodeOneMessage(conn)
 		if err != nil {
-			if err == io.EOF {
-				server.Log.Debug("the end of io")
-				c.Close()
-				return
-			}
 
-			if strings.HasSuffix(err.Error(), "use of closed network connection") {
-				server.Log.Debug("use of closed network connection")
-				c.Close()
-				return
-			}
-
-			server.Log.Error("read error: %s", err)
+			server.Log.Errorf("read error: %s", err)
 			c.Close()
 			return
 		}
