@@ -135,6 +135,7 @@ func (c *Connection) RcvMsgFromClient() {
 		}
 
 		server.Log.Infof("%s, come msg===\n%v\n=====", host, msg)
+		c.LastHbTime = time.Now().Unix()
 		switch msg := msg.(type) {
 		case *Connect:
 			ret := RetCodeAccepted
@@ -246,7 +247,6 @@ func (c *Connection) RcvMsgFromClient() {
 
 		case *PingReq:
 			server.Log.Infof("%s, ping req comes", host)
-			c.LastHbTime = time.Now().Unix()
 			pingrsp := &PingResp{}
 			err := c.Mgr.Provider.OnDeviceHeartBeat(c.DeviceId)
 			if err != nil {
