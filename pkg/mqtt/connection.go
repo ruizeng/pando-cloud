@@ -219,12 +219,21 @@ func (c *Connection) RcvMsgFromClient() {
 				c.Submit(publishRec)
 			}
 
+			err := c.Mgr.Provider.OnDeviceHeartBeat(c.DeviceId)
+			if err != nil {
+				server.Log.Warnf("%s, heartbeat set error %s, close now...", host, err)
+				c.Close()
+				return
+			}
+
 		case *PubAck:
 			server.Log.Infof("%s, comes publish ack", host)
 			c.confirmPublish(msg.MessageId)
 			err := c.Mgr.Provider.OnDeviceHeartBeat(c.DeviceId)
 			if err != nil {
 				server.Log.Warnf("%s, heartbeat set error %s, close now...", host, err)
+				c.Close()
+				return
 			}
 
 		case *PubRec:
@@ -243,6 +252,8 @@ func (c *Connection) RcvMsgFromClient() {
 			err := c.Mgr.Provider.OnDeviceHeartBeat(c.DeviceId)
 			if err != nil {
 				server.Log.Warnf("%s, heartbeat set error %s, close now...", host, err)
+				c.Close()
+				return
 			}
 
 		case *PingReq:
