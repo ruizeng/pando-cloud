@@ -1,6 +1,7 @@
 package mqtt
 
 import (
+	"github.com/PandoCloud/pando-cloud/pkg/server"
 	"net"
 	"sync"
 	"time"
@@ -81,6 +82,7 @@ func (m *Manager) PublishMessage2Server(deviceid uint64, msg *Publish) error {
 
 func (m *Manager) CleanWorker() {
 	for {
+		server.Log.Infoln("scanning and removing inactive connections...")
 		curTime := time.Now().Unix()
 
 		for _, con := range m.IdToConn {
@@ -88,7 +90,8 @@ func (m *Manager) CleanWorker() {
 				continue
 			}
 
-			if uint16(curTime-con.LastHbTime) > uint16(2*con.KeepAlive/2) {
+			if uint16(curTime-con.LastHbTime) > uint16(3*con.KeepAlive/2) {
+				server.Log.Infof("connection %v inactive , removing", con)
 				con.Close()
 			}
 		}
