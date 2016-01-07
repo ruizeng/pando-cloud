@@ -36,17 +36,20 @@ func (r *Registry) SaveVendor(vendor *models.Vendor, reply *models.Vendor) error
 		return err
 	}
 
-	err = db.Save(vendor).Error
-	if err != nil {
-		return err
-	}
+	if vendor.ID == 0 {
+		// if ID field is not initialized, will generate key first
+		err = db.Save(vendor).Error
+		if err != nil {
+			return err
+		}
 
-	key, err := r.keygen.GenRandomKey(int64(vendor.ID))
-	if err != nil {
-		return err
-	}
+		key, err := r.keygen.GenRandomKey(int64(vendor.ID))
+		if err != nil {
+			return err
+		}
 
-	vendor.VendorKey = key
+		vendor.VendorKey = key
+	}
 
 	err = db.Save(vendor).Error
 	if err != nil {
@@ -71,17 +74,20 @@ func (r *Registry) SaveProduct(product *models.Product, reply *models.Product) e
 		return err
 	}
 
-	err = db.Save(product).Error
-	if err != nil {
-		return err
-	}
+	if product.ID == 0 {
+		// create product
+		err = db.Save(product).Error
+		if err != nil {
+			return err
+		}
 
-	key, err := r.keygen.GenRandomKey(int64(product.ID))
-	if err != nil {
-		return err
-	}
+		key, err := r.keygen.GenRandomKey(int64(product.ID))
+		if err != nil {
+			return err
+		}
 
-	product.ProductKey = key
+		product.ProductKey = key
+	}
 
 	err = db.Save(product).Error
 	if err != nil {
@@ -107,17 +113,19 @@ func (r *Registry) SaveApplication(app *models.Application, reply *models.Applic
 		return err
 	}
 
-	err = db.Save(app).Error
-	if err != nil {
-		return err
-	}
+	if app.ID == 0 {
+		err = db.Save(app).Error
+		if err != nil {
+			return err
+		}
 
-	key, err := r.keygen.GenRandomKey(int64(app.ID))
-	if err != nil {
-		return err
-	}
+		key, err := r.keygen.GenRandomKey(int64(app.ID))
+		if err != nil {
+			return err
+		}
 
-	app.AppKey = key
+		app.AppKey = key
+	}
 
 	err = db.Save(app).Error
 	if err != nil {
@@ -162,8 +170,58 @@ func (r *Registry) ValidateApplication(key string, reply *models.Application) er
 	return nil
 }
 
+// FindVendor will find product by specified ID
+func (r *Registry) FindVendor(id int32, reply *models.Vendor) error {
+	db, err := getDB()
+	if err != nil {
+		return err
+	}
+
+	return db.First(reply, id).Error
+}
+
+// GetVendors will get all vendors in the platform.
+func (r *Registry) GetVendors(noarg int, reply *[]models.Vendor) error {
+	db, err := getDB()
+	if err != nil {
+		return err
+	}
+
+	return db.Find(reply).Error
+}
+
+// GetProducts will get all products in the platform.
+func (r *Registry) GetProducts(noarg int, reply *[]models.Product) error {
+	db, err := getDB()
+	if err != nil {
+		return err
+	}
+
+	return db.Find(reply).Error
+}
+
+// GetApplications will get all applications in the platform.
+func (r *Registry) GetApplications(noarg int, reply *[]models.Application) error {
+	db, err := getDB()
+	if err != nil {
+		return err
+	}
+
+	return db.Find(reply).Error
+}
+
 // FindProduct will find product by specified ID
 func (r *Registry) FindProduct(id int32, reply *models.Product) error {
+	db, err := getDB()
+	if err != nil {
+		return err
+	}
+
+	return db.First(reply, id).Error
+}
+
+// FindAppliation will find product by specified ID
+func (r *Registry) FindApplication(id int32, reply *models.Application) error {
 	db, err := getDB()
 	if err != nil {
 		return err
