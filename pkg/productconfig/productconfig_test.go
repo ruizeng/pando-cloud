@@ -33,7 +33,7 @@ func TestParseProductConfig(t *testing.T) {
       }],
       "events": []
     }
-  `
+    `
 
 	status :=
 		`
