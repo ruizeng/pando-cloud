@@ -4,6 +4,7 @@ go:
 services:
   - redis-server
   - mongodb
+  - rabbitmq
 before_install:
   - go get github.com/modocache/gover
   - go get github.com/mattn/goveralls
