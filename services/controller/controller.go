@@ -2,21 +2,26 @@ package main
 
 import (
 	"github.com/PandoCloud/pando-cloud/pkg/mongo"
+	"github.com/PandoCloud/pando-cloud/pkg/queue"
 	"github.com/PandoCloud/pando-cloud/pkg/rpcs"
 	"github.com/PandoCloud/pando-cloud/pkg/server"
 )
 
 const (
 	mongoSetName = "pandocloud"
+	topicEvents  = "events"
+	topicStatus  = "status"
 )
 
 type Controller struct {
 	commandRecorder *mongo.Recorder
 	eventRecorder   *mongo.Recorder
 	dataRecorder    *mongo.Recorder
+	eventsQueue     *queue.Queue
+	statusQueue     *queue.Queue
 }
 
-func NewController(mongohost string) (*Controller, error) {
+func NewController(mongohost string, rabbithost string) (*Controller, error) {
 	cmdr, err := mongo.NewRecorder(mongohost, mongoSetName, "commands")
 	if err != nil {
 		return nil, err
@@ -32,15 +37,23 @@ func NewController(mongohost string) (*Controller, error) {
 		return nil, err
 	}
 
+	eq, err := queue.New(rabbithost, topicEvents)
+	if err != nil {
+		return nil, err
+	}
+
+	sq, err := queue.New(rabbithost, topicStatus)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Controller{
 		commandRecorder: cmdr,
 		eventRecorder:   ever,
 		dataRecorder:    datar,
+		eventsQueue:     eq,
+		statusQueue:     sq,
 	}, nil
-}
-
-func (c *Controller) PutData(args rpcs.ArgsPutData, reply *rpcs.ReplyPutData) error {
-	return c.dataRecorder.Insert(args)
 }
 
 func (c *Controller) SetStatus(args rpcs.ArgsSetStatus, reply *rpcs.ReplySetStatus) error {
@@ -61,8 +74,28 @@ func (c *Controller) GetStatus(args rpcs.ArgsGetStatus, reply *rpcs.ReplyGetStat
 	return server.RPCCallByHost(rpchost, "Access.GetStatus", args, reply)
 }
 
+func (c *Controller) OnStatus(args rpcs.ArgsOnStatus, reply *rpcs.ReplyOnStatus) error {
+	err := c.dataRecorder.Insert(args)
+	if err != nil {
+		return err
+	}
+	err = c.statusQueue.Send(args)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (c *Controller) OnEvent(args rpcs.ArgsOnEvent, reply *rpcs.ReplyOnEvent) error {
-	return c.eventRecorder.Insert(args)
+	err := c.eventRecorder.Insert(args)
+	if err != nil {
+		return err
+	}
+	err = c.eventsQueue.Send(args)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (c *Controller) SendCommand(args rpcs.ArgsSendCommand, reply *rpcs.ReplySendCommand) error {

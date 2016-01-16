@@ -13,7 +13,7 @@ func main() {
 	}
 
 	// register a rpc service
-	controller, err := NewController(*confMongoHost)
+	controller, err := NewController(*confMongoHost, *confRabbitHost)
 	if err != nil {
 		server.Log.Errorf("NewController Error: %s", err)
 		return
