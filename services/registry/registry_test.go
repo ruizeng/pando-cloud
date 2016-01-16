@@ -16,6 +16,31 @@ func testVendor(t *testing.T, r *Registry) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	err = r.FindVendor(vendor.ID, vendor)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	updateVendor := &models.Vendor{
+		ID:                vendor.ID,
+		VendorName:        "testvendorupdate",
+		VendorDescription: "this is a test vendor",
+	}
+
+	err = r.SaveVendor(updateVendor, updateVendor)
+	if err != nil {
+		t.Fatal(err)
+	}
+	vendorRow := &models.Vendor{}
+	err = r.FindVendor(updateVendor.ID, vendorRow)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if vendorRow.VendorName != updateVendor.VendorName {
+		t.Errorf("expect vendorName:%v, got:%v", updateVendor.VendorName, vendorRow.VendorName)
+	}
+
 	t.Log(vendor)
 }
 
@@ -36,6 +61,16 @@ func testProduct(t *testing.T, r *Registry) {
 	}
 	t.Log(product)
 
+	productRow := &models.Product{}
+	err = r.FindProduct(product.ID, productRow)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if product.ProductKey != productRow.ProductKey {
+		t.Fatalf("expected %v, got %v", product.ProductKey, productRow.ProductKey)
+	}
+
 	product.ProductName = "test for update."
 	err = r.SaveProduct(product, product)
 	if err != nil {
@@ -49,6 +84,10 @@ func testProduct(t *testing.T, r *Registry) {
 		t.Error(err)
 	}
 	t.Log(reply)
+
+	if reply.ProductName != product.ProductName {
+		t.Errorf("expected %v, got %v", product.ProductName, reply.ProductName)
+	}
 
 	testProductKey = product.ProductKey
 
@@ -72,12 +111,26 @@ func testApplication(t *testing.T, r *Registry) {
 	}
 	t.Log(app)
 
+	appRow := &models.Application{}
+	err = r.FindApplication(app.ID, appRow)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	app.AppName = "another desc."
 	err = r.SaveApplication(app, app)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Log(app)
+	err = r.FindApplication(app.ID, appRow)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if appRow.AppName != app.AppName {
+		t.Errorf("expected %v, got %v", app.AppName, appRow.AppName)
+	}
 
 	reply := &models.Application{}
 	err = r.ValidateApplication(app.AppKey, reply)
@@ -132,6 +185,15 @@ func testDevice(t *testing.T, r *Registry) {
 	err = r.UpdateDeviceInfo(args2, device)
 	if err != nil {
 		t.Error(err)
+	}
+	
+	devRow := &models.Device{}
+	err = r.FindDeviceByIdentifier(device.DeviceIdentifier, devRow)
+	if err != nil {
+		t.Error(err)
+	}
+	if devRow.DeviceName != device.DeviceName {
+		t.Errorf(" want %v, got %v", device.DeviceName, devRow.DeviceName)
 	}
 	t.Log(device)
 }
