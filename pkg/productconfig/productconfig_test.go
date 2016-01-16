@@ -12,7 +12,6 @@ func TestParseProductConfig(t *testing.T) {
 		`
     {
       "objects": [{
-        "id": 2,
         "no": 1,
         "label": "switch",
         "part": 1,

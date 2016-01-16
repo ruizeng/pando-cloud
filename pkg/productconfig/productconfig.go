@@ -76,6 +76,41 @@ func (config *ProductConfig) ValidateStatus(label string, params []interface{}) 
 	return status, realParams, nil
 }
 
+func (config *ProductConfig) ValidateCommandOrEvent(name string, params []interface{}, typ string) (*ProductCommandOrEvent, []interface{}, error) {
+	var target []ProductCommandOrEvent
+	if typ == "command" {
+		target = config.Commands
+	} else if typ == "event" {
+		target = config.Events
+	} else {
+		return nil, []interface{}{}, errors.New("wrong target type.")
+	}
+
+	// search for name
+	var paramInfo []CommandOrEventParam
+	var coe *ProductCommandOrEvent
+	found := false
+	for _, one := range target {
+		if one.Name == name {
+			paramInfo = one.Params
+			coe = &one
+			found = true
+			break
+		}
+	}
+	if found == false {
+		return nil, []interface{}{}, errors.New("command or event not found.")
+	}
+	if len(paramInfo) != len(params) {
+		return nil, []interface{}{}, errors.New("wrong parameters.")
+	}
+	realParams := make([]interface{}, len(params))
+	for idx, para := range paramInfo {
+		realParams[idx] = tlv.CastTLV(params[idx], para.ValueType)
+	}
+	return coe, realParams, nil
+}
+
 func (config *ProductConfig) StatusToMap(status []protocol.SubData) (map[string][]interface{}, error) {
 	result := make(map[string][]interface{})
 
@@ -92,6 +127,25 @@ func (config *ProductConfig) StatusToMap(status []protocol.SubData) (map[string]
 		}
 		result[label] = val
 	}
+
+	return result, nil
+}
+
+func (config *ProductConfig) EventToMap(event *protocol.Event) (map[string][]interface{}, error) {
+	result := make(map[string][]interface{})
+
+	name := ""
+	for _, ev := range config.Events {
+		if ev.No == int(event.Head.No) {
+			name = ev.Name
+		}
+	}
+	val, err := tlv.ReadTLVs(event.Params)
+	if err != nil {
+		return nil, err
+	}
+
+	result[name] = val
 
 	return result, nil
 }
@@ -122,6 +176,36 @@ func (config *ProductConfig) MapToStatus(data map[string]interface{}) ([]protoco
 			},
 			Params: tlvs,
 		})
+	}
+
+	return result, nil
+}
+
+func (config *ProductConfig) MapToCommand(cmd map[string]interface{}) (*protocol.Command, error) {
+	result := &protocol.Command{}
+
+	for name, one := range cmd {
+		params, ok := one.([]interface{})
+		if !ok {
+			return nil, fmt.Errorf("command format error: %v", one)
+		}
+
+		c, realParams, err := config.ValidateCommandOrEvent(name, params, "command")
+		if err != nil {
+			return nil, err
+		}
+
+		tlvs, err := tlv.MakeTLVs(realParams)
+		if err != nil {
+			return nil, err
+		}
+
+		result.Head.No = uint16(c.No)
+		result.Head.Priority = uint16(c.Priority)
+		result.Head.SubDeviceid = uint16(c.Part)
+		result.Head.ParamsCount = uint16(len(realParams))
+		result.Params = tlvs
+
 	}
 
 	return result, nil
