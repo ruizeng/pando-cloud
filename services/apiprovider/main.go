@@ -27,6 +27,12 @@ func main() {
 		return
 	}
 
+	// run notifier
+	err = RunNotifier()
+	if err != nil {
+		server.Log.Fatalf("Run Notifier Error: %s", err)
+	}
+
 	// go
 	err = server.Run()
 	if err != nil {

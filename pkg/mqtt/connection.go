@@ -110,6 +110,7 @@ func (c *Connection) ValidateToken(token []byte) error {
 
 func (c *Connection) Close() {
 	deviceid := c.DeviceId
+	server.Log.Infof("closing connection of device %v", deviceid)
 	if c.Conn != nil {
 		c.Conn.Close()
 	}

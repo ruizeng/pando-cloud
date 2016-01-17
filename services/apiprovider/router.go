@@ -14,12 +14,23 @@ func route(m *martini.ClassicMartini) {
 	m.Get("/application/v1/devices/:identifier/info", ApplicationAuthOnDeviceIdentifer, GetDeviceInfoByIdentifier)
 
 	// get devie current status
-	m.Get("/application/v1/devices/:identifier/status/current", ApplicationAuthOnDeviceIdentifer, GetDeviceCurrentStatus)
+	m.Get("/application/v1/devices/:identifier/status/current",
+		ApplicationAuthOnDeviceIdentifer, CheckDeviceOnline, CheckProductConfig,
+		GetDeviceCurrentStatus)
 
 	// get devie latest status
-	m.Get("/application/v1/devices/:identifier/status/latest", ApplicationAuthOnDeviceIdentifer, GetDeviceLatestStatus)
+	m.Get("/application/v1/devices/:identifier/status/latest",
+		ApplicationAuthOnDeviceIdentifer, CheckDeviceOnline, CheckProductConfig,
+		GetDeviceLatestStatus)
 
-	// set devie status
-	m.Put("/application/v1/devices/:identifier/status", ApplicationAuthOnDeviceIdentifer, SetDeviceStatus)
+	// set device status
+	m.Put("/application/v1/devices/:identifier/status",
+		ApplicationAuthOnDeviceIdentifer, CheckDeviceOnline, CheckProductConfig,
+		SetDeviceStatus)
+
+	// send a command to device
+	m.Post("/application/v1/devices/:identifier/commands",
+		ApplicationAuthOnDeviceIdentifer, CheckDeviceOnline, CheckProductConfig,
+		SendCommandToDevice)
 
 }

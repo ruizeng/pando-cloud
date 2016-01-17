@@ -3,7 +3,6 @@ package queue
 
 import (
 	"errors"
-	"fmt"
 	"github.com/PandoCloud/pando-cloud/pkg/serializer"
 	"github.com/streadway/amqp"
 )
@@ -124,10 +123,8 @@ func (q *Queue) Receive(target interface{}) error {
 		return errors.New("Message Queue Has Not Been Initialized.")
 	}
 
-	fmt.Println(1)
 	msg, ok := <-q.recvChan
 
-	fmt.Println(msg)
 	if !ok {
 		return errors.New("Message Queue Has Been Closed.")
 	}
