@@ -76,15 +76,15 @@ func (mp *MQTTProvider) OnDeviceMessage(deviceid uint64, msgtype string, message
 		}
 
 		// it's a normal report.
-		reply := rpcs.ReplyPutData{}
-		args := rpcs.ArgsPutData{
+		reply := rpcs.ReplyOnStatus{}
+		args := rpcs.ArgsOnStatus{
 			DeviceId:  deviceid,
 			Timestamp: data.Head.Timestamp,
 			Subdata:   data.SubData,
 		}
-		err = server.RPCCallByName("controller", "Controller.PutData", args, &reply)
+		err = server.RPCCallByName("controller", "Controller.OnStatus", args, &reply)
 		if err != nil {
-			server.Log.Errorf("device put data error. args: %v, error: %v", args, err)
+			server.Log.Errorf("device report status error. args: %v, error: %v", args, err)
 			return
 		}
 	case "e":

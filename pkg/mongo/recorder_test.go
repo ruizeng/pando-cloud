@@ -32,7 +32,7 @@ func TestRecorder(t *testing.T) {
 
 	subdatas = append(subdatas, subdata)
 
-	data := rpcs.ArgsPutData{
+	data := rpcs.ArgsOnStatus{
 		DeviceId:  deviceid,
 		Timestamp: timestamp,
 		Subdata:   subdatas,
@@ -43,7 +43,7 @@ func TestRecorder(t *testing.T) {
 		t.Error(err)
 	}
 
-	readData := rpcs.ArgsPutData{}
+	readData := rpcs.ArgsOnStatus{}
 	err = r.FindLatest(deviceid, &readData)
 
 	if err != nil {
@@ -54,7 +54,7 @@ func TestRecorder(t *testing.T) {
 		t.Errorf("read data want %v, but got %v", data, readData)
 	}
 
-	readDatas := []rpcs.ArgsPutData{}
+	readDatas := []rpcs.ArgsOnStatus{}
 	err = r.FindByTimestamp(deviceid, timestamp, timestamp, &readDatas)
 	t.Log(readDatas)
 	if !reflect.DeepEqual(data, readDatas[0]) {

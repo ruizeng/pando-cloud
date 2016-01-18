@@ -4,37 +4,11 @@ import (
 	"encoding/json"
 	"github.com/PandoCloud/pando-cloud/pkg/protocol"
 	"github.com/PandoCloud/pando-cloud/pkg/tlv"
+	"reflect"
 	"testing"
 )
 
-func TestParseProductConfig(t *testing.T) {
-	config :=
-		`
-    {
-      "objects": [{
-        "id": 2,
-        "no": 1,
-        "label": "switch",
-        "part": 1,
-        "status": [{
-          "value_type": 7,
-          "name": "onoff"
-        }]
-      }],
-      "commands": [{
-        "no": 1,
-        "part": 1,
-        "name": "switch",
-        "priority": 0,
-        "params": [{
-          "value_type": 7,
-          "name": "status"
-        }]
-      }],
-      "events": []
-    }
-  `
-
+func testStatus(c *ProductConfig, t *testing.T) {
 	status :=
 		`
     {
@@ -42,13 +16,8 @@ func TestParseProductConfig(t *testing.T) {
     }
     `
 
-	c, err := New(config)
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	var v interface{}
-	err = json.Unmarshal([]byte(status), &v)
+	err := json.Unmarshal([]byte(status), &v)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -93,5 +62,106 @@ func TestParseProductConfig(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+}
+
+func testEvent(c *ProductConfig, t *testing.T) {
+	want := `{"alarm":["test"]}`
+
+	testev := &protocol.Event{}
+	testev.Head.No = 1
+	testev.Head.SubDeviceid = 1
+	params, err := tlv.MakeTLVs([]interface{}{"test"})
+	if err != nil {
+		t.Error(err)
+	}
+	testev.Params = params
+
+	m, err := c.EventToMap(testev)
+	if err != nil {
+		t.Error(err)
+	}
+
+	result, err := json.Marshal(m)
+	if err != nil {
+		t.Error(err)
+	}
+
+	got := string(result)
+
+	if got != want {
+		t.Errorf("event to map error: want: %v, got : %v", want, got)
+	}
+
+}
+
+func testCommand(c *ProductConfig, t *testing.T) {
+	input := `{"switch":[1,2]}`
+
+	v := make(map[string]interface{})
+	err := json.Unmarshal([]byte(input), &v)
+	if err != nil {
+		t.Fatal(err)
+	}
+	params, err := tlv.MakeTLVs([]interface{}{uint8(1), uint8(2)})
+	want := &protocol.Command{}
+	want.Head.No = 1
+	want.Head.SubDeviceid = 1
+	want.Head.ParamsCount = 2
+	want.Params = params
+
+	got, err := c.MapToCommand(v)
+
+	if !reflect.DeepEqual(want, got) {
+		t.Errorf("map to command error: want: %v, got %v", want, got)
+	}
+}
+
+func TestParseProductConfig(t *testing.T) {
+	config :=
+		`
+    {
+      "objects": [{
+        "no": 1,
+        "label": "switch",
+        "part": 1,
+        "status": [{
+          "value_type": 7,
+          "name": "onoff"
+        }]
+      }],
+      "commands": [{
+        "no": 1,
+        "part": 1,
+        "name": "switch",
+        "priority": 0,
+        "params": [{
+          "value_type": 7,
+          "name": "p1"
+        },{
+          "value_type": 7,
+          "name": "p2"
+        }]
+      }],
+      "events": [{
+        "no": 1,
+        "part": 1,
+        "name": "alarm",
+        "priority": 0,
+        "params": [{
+          "value_type": 12,
+          "name": "text"
+        }]
+      }]
+    }
+    `
+
+	c, err := New(config)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	testStatus(c, t)
+	testEvent(c, t)
+	testCommand(c, t)
 
 }

@@ -1,58 +1,136 @@
-// package queue implement a message queque api with redis pub/sub command
+// package queue implement a message queque api with rabbitmq
 package queue
 
 import (
-	// "fmt"
-	"github.com/PandoCloud/pando-cloud/pkg/redispool"
+	"errors"
 	"github.com/PandoCloud/pando-cloud/pkg/serializer"
-	// "github.com/garyburd/redigo/redis"
+	"github.com/streadway/amqp"
 )
 
+const defaultRecvChanLen = 8
+
 type Queue struct {
-	redishost string
+	rabbithost   string
+	conn         *amqp.Connection
+	ch           *amqp.Channel
+	queue        amqp.Queue
+	recvChan     chan ([]byte)
+	beginReceive bool
 }
 
-func New(redishost string) *Queue {
-	return &Queue{redishost}
-}
-
-func (q *Queue) Send(topic string, msg interface{}) error {
-	conn, err := redispool.GetClient(q.redishost)
+func New(rabbithost string, name string) (*Queue, error) {
+	conn, err := amqp.Dial(rabbithost)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
+	ch, err := conn.Channel()
+	if err != nil {
+		return nil, err
+	}
+
+	queue, err := ch.QueueDeclare(
+		name,  // name
+		true,  // durable
+		false, // delete when unused
+		false, // exclusive
+		false, // no-wait
+		nil,   // arguments
+	)
+	if err != nil {
+		return nil, errors.New("Failed to declare a queue")
+	}
+
+	err = ch.Qos(
+		1,     // prefetch count
+		0,     // prefetch size
+		false, // global
+	)
+	if err != nil {
+		return nil, errors.New("Failed to set QoS")
+	}
+
+	q := &Queue{rabbithost, conn, ch, queue, nil, false}
+
+	return q, nil
+}
+
+func (q *Queue) keepReceivingFromQueue() {
+	if q.ch == nil || q.recvChan == nil {
+		//Message Queue Not Initialzed.
+		return
+	}
+
+	defer func() {
+		if q.recvChan != nil {
+			close(q.recvChan)
+		}
+	}()
+
+	msgs, err := q.ch.Consume(
+		q.queue.Name, // queue
+		"",           // consumer
+		false,        // auto-ack
+		false,        // exclusive
+		false,        // no-local
+		false,        // no-wait
+		nil,          // args
+	)
+
+	if err != nil {
+		return
+	}
+
+	for d := range msgs {
+		q.recvChan <- d.Body
+		d.Ack(false)
+	}
+
+}
+
+// Send will send a message to the queue.
+func (q *Queue) Send(msg interface{}) error {
+	if q.ch == nil {
+		return errors.New("Message Queue Not Initialzed.")
+	}
 	msgStr, err := serializer.Struct2String(msg)
 	if err != nil {
 		return err
 	}
-
-	_, err = conn.Do("PUBLISH", topic, msgStr)
-	if err != nil {
-		return err
-	}
+	err = q.ch.Publish(
+		"",           // exchange
+		q.queue.Name, // routing key
+		false,        // mandatory
+		false,
+		amqp.Publishing{
+			DeliveryMode: amqp.Persistent,
+			ContentType:  "text/plain",
+			Body:         []byte(msgStr),
+		})
 
 	return nil
 }
 
-func (q *Queue) Receive(topic string, target interface{}) error {
-	conn, err := redispool.GetClient(q.redishost)
-	if err != nil {
-		return err
-	}
-	_, err = conn.Do("SUBSCRIBE", topic)
-	if err != nil {
-		return err
+// Receive will reveive a message from the queue. may be blocked if there is no message in queue.
+func (q *Queue) Receive(target interface{}) error {
+	if !q.beginReceive {
+		q.recvChan = make(chan ([]byte), defaultRecvChanLen)
+		go q.keepReceivingFromQueue()
+		q.beginReceive = true
 	}
 
-	result, err := conn.Receive()
-	if err != nil {
-		return err
+	if q.recvChan == nil {
+		return errors.New("Message Queue Has Not Been Initialized.")
 	}
 
-	strMsg := string(result.([]interface{})[2].([]byte))
+	msg, ok := <-q.recvChan
 
-	err = serializer.String2Struct(strMsg, target)
+	if !ok {
+		return errors.New("Message Queue Has Been Closed.")
+	}
+
+	strMsg := string(msg)
+	err := serializer.String2Struct(strMsg, target)
 	if err != nil {
 		return err
 	}

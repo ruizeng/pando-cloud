@@ -3,6 +3,8 @@ package main
 import (
 	"errors"
 	"github.com/PandoCloud/pando-cloud/pkg/models"
+	"github.com/PandoCloud/pando-cloud/pkg/productconfig"
+	"github.com/PandoCloud/pando-cloud/pkg/rpcs"
 	"github.com/PandoCloud/pando-cloud/pkg/server"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
@@ -84,4 +86,48 @@ func ApplicationAuthOnDeviceIdentifer(context martini.Context, params martini.Pa
 		return
 	}
 
+}
+
+// check if device is online.
+func CheckDeviceOnline(context martini.Context, params martini.Params, req *http.Request, r render.Render) {
+	identifier := params["identifier"]
+
+	device := &models.Device{}
+	err := server.RPCCallByName("registry", "Registry.FindDeviceByIdentifier", identifier, device)
+	if err != nil {
+		r.JSON(http.StatusOK, renderError(ErrDeviceNotFound, err))
+		return
+	}
+
+	onlineargs := rpcs.ArgsGetDeviceOnlineStatus{
+		Id: uint64(device.ID),
+	}
+	onlinereply := rpcs.ReplyGetDeviceOnlineStatus{}
+	err = server.RPCCallByName("devicemanager", "DeviceManager.GetDeviceOnlineStatus", onlineargs, &onlinereply)
+	if err != nil {
+		server.Log.Errorf("get devie online status error: %v", err)
+		r.JSON(http.StatusOK, renderError(ErrDeviceNotOnline, err))
+		return
+	}
+
+	context.Map(device)
+}
+
+// check if proudct is ok and map a product config to context, must by called after CheckDevice
+func CheckProductConfig(context martini.Context, device *models.Device,
+	params martini.Params, req *http.Request, r render.Render) {
+	product := &models.Product{}
+	err := server.RPCCallByName("registry", "Registry.FindProduct", device.ProductID, product)
+	if err != nil {
+		r.JSON(http.StatusOK, renderError(ErrProductNotFound, err))
+		return
+	}
+
+	c, err := productconfig.New(product.ProductConfig)
+	if err != nil {
+		r.JSON(http.StatusOK, renderError(ErrWrongProductConfig, err))
+		return
+	}
+
+	context.Map(c)
 }

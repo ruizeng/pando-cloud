@@ -5,12 +5,12 @@ import (
 	"github.com/PandoCloud/pando-cloud/pkg/tlv"
 )
 
-type ArgsPutData struct {
+type ArgsOnStatus struct {
 	DeviceId  uint64
 	Timestamp uint64
 	Subdata   []protocol.SubData
 }
-type ReplyPutData ReplyEmptyResult
+type ReplyOnStatus ReplyEmptyResult
 
 type ArgsOnEvent struct {
 	DeviceId  uint64

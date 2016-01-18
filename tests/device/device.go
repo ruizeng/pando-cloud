@@ -193,6 +193,34 @@ func (d *Device) reportStatus(client *MQTT.Client) {
 
 }
 
+func (d *Device) reportEvent(client *MQTT.Client) {
+	for {
+		time.Sleep(3 * time.Second)
+
+		event := protocol.Event{}
+
+		params, err := tlv.MakeTLVs([]interface{}{"hello event."})
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		event.Params = params
+		event.Head.No = 1
+		event.Head.SubDeviceid = 1
+		event.Head.ParamsCount = uint16(len(params))
+
+		payload, err := event.Marshal()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		client.Publish("e", 1, false, payload)
+
+	}
+}
+
 func (d *Device) statusHandler(client *MQTT.Client, msg MQTT.Message) {
 	status := protocol.Data{}
 
@@ -224,7 +252,7 @@ func (d *Device) commandHandler(client *MQTT.Client, msg MQTT.Message) {
 	case commonCmdGetStatus:
 		d.reportStatus(client)
 	default:
-		fmt.Println("unsuported command : %v", cmd.Head.No)
+		fmt.Printf("received command : %v: %v", cmd.Head.No, cmd.Params)
 	}
 }
 
@@ -267,6 +295,9 @@ func (d *Device) DoAccess() error {
 	if token := c.Connect(); token.Wait() && token.Error() != nil {
 		return token.Error()
 	}
+
+	// beigin report event test
+	go d.reportEvent(c)
 
 	// we just pause here to wait for messages
 	<-make(chan int)

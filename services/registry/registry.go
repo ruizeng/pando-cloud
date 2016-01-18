@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"github.com/PandoCloud/pando-cloud/pkg/generator"
 	"github.com/PandoCloud/pando-cloud/pkg/models"
 	"github.com/PandoCloud/pando-cloud/pkg/rpcs"
@@ -36,21 +37,30 @@ func (r *Registry) SaveVendor(vendor *models.Vendor, reply *models.Vendor) error
 		return err
 	}
 
+	if vendor.ID == 0 {
+		// if ID field is not initialized, will generate key first
+		err = db.Save(vendor).Error
+		if err != nil {
+			return err
+		}
+
+		key, err := r.keygen.GenRandomKey(int64(vendor.ID))
+		if err != nil {
+			return err
+		}
+
+		vendor.VendorKey = key
+	}
+
 	err = db.Save(vendor).Error
 	if err != nil {
 		return err
 	}
 
-	key, err := r.keygen.GenRandomKey(int64(vendor.ID))
-	if err != nil {
-		return err
-	}
-
-	vendor.VendorKey = key
-
-	err = db.Save(vendor).Error
-	if err != nil {
-		return err
+	cache := getCache()
+	cacheKey := fmt.Sprintf("Vendor:%v", vendor.ID)
+	if _, ok := cache.Get(cacheKey); ok {
+		cache.Delete(cacheKey)
 	}
 
 	reply.ID = vendor.ID
@@ -71,21 +81,30 @@ func (r *Registry) SaveProduct(product *models.Product, reply *models.Product) e
 		return err
 	}
 
+	if product.ID == 0 {
+		// create product
+		err = db.Save(product).Error
+		if err != nil {
+			return err
+		}
+
+		key, err := r.keygen.GenRandomKey(int64(product.ID))
+		if err != nil {
+			return err
+		}
+
+		product.ProductKey = key
+	}
+
 	err = db.Save(product).Error
 	if err != nil {
 		return err
 	}
 
-	key, err := r.keygen.GenRandomKey(int64(product.ID))
-	if err != nil {
-		return err
-	}
-
-	product.ProductKey = key
-
-	err = db.Save(product).Error
-	if err != nil {
-		return err
+	cache := getCache()
+	cacheKey := fmt.Sprintf("Product:%v", product.ID)
+	if _, ok := cache.Get(cacheKey); ok {
+		cache.Delete(cacheKey)
 	}
 
 	reply.ID = product.ID
@@ -107,21 +126,29 @@ func (r *Registry) SaveApplication(app *models.Application, reply *models.Applic
 		return err
 	}
 
+	if app.ID == 0 {
+		err = db.Save(app).Error
+		if err != nil {
+			return err
+		}
+
+		key, err := r.keygen.GenRandomKey(int64(app.ID))
+		if err != nil {
+			return err
+		}
+
+		app.AppKey = key
+	}
+
 	err = db.Save(app).Error
 	if err != nil {
 		return err
 	}
 
-	key, err := r.keygen.GenRandomKey(int64(app.ID))
-	if err != nil {
-		return err
-	}
-
-	app.AppKey = key
-
-	err = db.Save(app).Error
-	if err != nil {
-		return err
+	cache := getCache()
+	cacheKey := fmt.Sprintf("Application:%v", app.ID)
+	if _, ok := cache.Get(cacheKey); ok {
+		cache.Delete(cacheKey)
 	}
 
 	reply.ID = app.ID
@@ -150,9 +177,18 @@ func (r *Registry) ValidateApplication(key string, reply *models.Application) er
 		return err
 	}
 
-	err = db.First(reply, id).Error
-	if err != nil {
-		return err
+	cache := getCache()
+	cacheKey := fmt.Sprintf("Application:%v", id)
+	if cacheValue, ok := cache.Get(cacheKey); ok {
+		reply = cacheValue.(*models.Application)
+	} else {
+		err = db.First(reply, id).Error
+		if err != nil {
+			return err
+		}
+		var storage models.Application
+		storage = *reply
+		cache.Set(cacheKey, &storage)
 	}
 
 	if reply.AppKey != key {
@@ -162,6 +198,60 @@ func (r *Registry) ValidateApplication(key string, reply *models.Application) er
 	return nil
 }
 
+// FindVendor will find product by specified ID
+func (r *Registry) FindVendor(id int32, reply *models.Vendor) error {
+	db, err := getDB()
+	if err != nil {
+		return err
+	}
+
+	cache := getCache()
+	cacheKey := fmt.Sprintf("Vendor:%v", id)
+	if cacheValue, ok := cache.Get(cacheKey); ok {
+		reply = cacheValue.(*models.Vendor)
+	} else {
+		err = db.First(reply, id).Error
+		if err != nil {
+			return err
+		}
+		var storage models.Vendor
+		storage = *reply
+		cache.Set(cacheKey, &storage)
+	}
+
+	return nil
+}
+
+// GetVendors will get all vendors in the platform.
+func (r *Registry) GetVendors(noarg int, reply *[]models.Vendor) error {
+	db, err := getDB()
+	if err != nil {
+		return err
+	}
+
+	return db.Find(reply).Error
+}
+
+// GetProducts will get all products in the platform.
+func (r *Registry) GetProducts(noarg int, reply *[]models.Product) error {
+	db, err := getDB()
+	if err != nil {
+		return err
+	}
+
+	return db.Find(reply).Error
+}
+
+// GetApplications will get all applications in the platform.
+func (r *Registry) GetApplications(noarg int, reply *[]models.Application) error {
+	db, err := getDB()
+	if err != nil {
+		return err
+	}
+
+	return db.Find(reply).Error
+}
+
 // FindProduct will find product by specified ID
 func (r *Registry) FindProduct(id int32, reply *models.Product) error {
 	db, err := getDB()
@@ -169,7 +259,45 @@ func (r *Registry) FindProduct(id int32, reply *models.Product) error {
 		return err
 	}
 
-	return db.First(reply, id).Error
+	cache := getCache()
+	cacheKey := fmt.Sprintf("Product:%v", id)
+	if cacheValue, ok := cache.Get(cacheKey); ok {
+		reply = cacheValue.(*models.Product)
+	} else {
+		err = db.First(reply, id).Error
+		if err != nil {
+			return err
+		}
+		var storage models.Product
+		storage = *reply
+		cache.Set(cacheKey, &storage)
+	}
+
+	return nil
+}
+
+// FindAppliation will find product by specified ID
+func (r *Registry) FindApplication(id int32, reply *models.Application) error {
+	db, err := getDB()
+	if err != nil {
+		return err
+	}
+
+	cache := getCache()
+	cacheKey := fmt.Sprintf("Application:%v", id)
+	if cacheValue, ok := cache.Get(cacheKey); ok {
+		reply = cacheValue.(*models.Application)
+	} else {
+		err = db.First(reply, id).Error
+		if err != nil {
+			return err
+		}
+		var storage models.Application
+		storage = *reply
+		cache.Set(cacheKey, &storage)
+	}
+
+	return nil
 }
 
 // ValidProduct try to validate the given product key.
@@ -185,9 +313,18 @@ func (r *Registry) ValidateProduct(key string, reply *models.Product) error {
 		return err
 	}
 
-	err = db.First(reply, id).Error
-	if err != nil {
-		return err
+	cache := getCache()
+	cacheKey := fmt.Sprintf("Product:%v", id)
+	if cacheValue, ok := cache.Get(cacheKey); ok {
+		reply = cacheValue.(*models.Product)
+	} else {
+		err = db.First(reply, id).Error
+		if err != nil {
+			return err
+		}
+		var storage models.Product
+		storage = *reply
+		cache.Set(cacheKey, &storage)
 	}
 
 	if reply.ProductKey != key {
@@ -240,12 +377,21 @@ func (r *Registry) RegisterDevice(args *rpcs.ArgsDeviceRegister, reply *models.D
 			return err
 		}
 	} else {
+
+		//delete cache
+		cache := getCache()
+		cacheKey := fmt.Sprintf("Device:%v", identifier)
+		if _, ok := cache.Get(cacheKey); ok {
+			cache.Delete(cacheKey)
+		}
+		
 		// device has aleady been saved. just update version info.
 		reply.DeviceVersion = args.DeviceVersion
 		err = db.Save(reply).Error
 		if err != nil {
 			return err
 		}
+
 	}
 
 	return nil
@@ -258,13 +404,22 @@ func (r *Registry) FindDeviceByIdentifier(identifier string, reply *models.Devic
 		return err
 	}
 
-	err = db.Where(&models.Device{
-		DeviceIdentifier: identifier,
-	}).First(reply).Error
-
-	if err != nil {
-		return err
+	cache := getCache()
+	cacheKey := fmt.Sprintf("Device:%v", identifier)
+	if cacheValue, ok := cache.Get(identifier); ok {
+		reply = cacheValue.(*models.Device)
+	} else {
+		err = db.Where(&models.Device{
+			DeviceIdentifier: identifier,
+		}).First(reply).Error
+		if err != nil {
+			return err
+		}
+		var storage models.Device
+		storage = *reply
+		cache.Set(cacheKey, &storage)
 	}
+
 	return nil
 }
 
@@ -314,6 +469,13 @@ func (r *Registry) UpdateDeviceInfo(args *rpcs.ArgsDeviceUpdate, reply *models.D
 	err = r.FindDeviceByIdentifier(args.DeviceIdentifier, reply)
 	if err != nil {
 		return err
+	}
+	
+	//delete cache
+	cache := getCache()
+	cacheKey := fmt.Sprintf("Device:%v", args.DeviceIdentifier)
+	if _, ok := cache.Get(cacheKey); ok {
+		cache.Delete(cacheKey)
 	}
 
 	reply.DeviceName = args.DeviceName

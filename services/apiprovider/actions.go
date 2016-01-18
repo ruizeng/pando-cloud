@@ -17,10 +17,14 @@ const (
 	ErrProductNotFound    = 10002
 	ErrDeviceNotFound     = 10003
 	ErrDeviceNotOnline    = 10004
-	ErrWrongStatusFormat  = 10005
+	ErrWrongRequestFormat = 10005
 	ErrWrongProductConfig = 10006
 	ErrWrongQueryFormat   = 10007
 	ErrAccessDenied       = 10008
+)
+
+const (
+	defaultTimeOut = 3 // seconds
 )
 
 func renderError(code int, err error) Common {
@@ -75,59 +79,28 @@ func GetDeviceInfoByIdentifier(urlparams martini.Params, r render.Render) {
 	return
 }
 
-func GetDeviceCurrentStatus(urlparams martini.Params, r render.Render) {
-	identifier := urlparams["identifier"]
-	server.Log.Printf("ACTION GetDeviceCurrentStatus, identifier:: %v", identifier)
-
-	device := &models.Device{}
-	err := server.RPCCallByName("registry", "Registry.FindDeviceByIdentifier", identifier, device)
-	if err != nil {
-		r.JSON(http.StatusOK, renderError(ErrDeviceNotFound, err))
-		return
-	}
-
-	onlineargs := rpcs.ArgsGetDeviceOnlineStatus{
-		Id: uint64(device.ID),
-	}
-	onlinereply := rpcs.ReplyGetDeviceOnlineStatus{}
-	err = server.RPCCallByName("devicemanager", "DeviceManager.GetDeviceOnlineStatus", onlineargs, &onlinereply)
-	if err != nil {
-		server.Log.Errorf("get devie online status error: %v", err)
-		r.JSON(http.StatusOK, renderError(ErrDeviceNotOnline, err))
-		return
-	}
+func GetDeviceCurrentStatus(device *models.Device, config *productconfig.ProductConfig,
+	urlparams martini.Params, r render.Render) {
+	server.Log.Printf("ACTION GetDeviceCurrentStatus, identifier:: %v", device.DeviceIdentifier)
 
 	statusargs := rpcs.ArgsGetStatus{
 		Id: uint64(device.ID),
 	}
 	statusreply := rpcs.ReplyGetStatus{}
-	err = server.RPCCallByName("controller", "Controller.GetStatus", statusargs, &statusreply)
+	err := server.RPCCallByName("controller", "Controller.GetStatus", statusargs, &statusreply)
 	if err != nil {
 		server.Log.Errorf("get devie status error: %v", err)
 		r.JSON(http.StatusOK, renderError(ErrSystemFault, err))
 		return
 	}
 
-	product := &models.Product{}
-	err = server.RPCCallByName("registry", "Registry.FindProduct", device.ProductID, product)
+	status, err := config.StatusToMap(statusreply.Status)
 	if err != nil {
-		r.JSON(http.StatusOK, renderError(ErrProductNotFound, err))
-		return
-	}
-
-	c, err := productconfig.New(product.ProductConfig)
-	if err != nil {
-		r.JSON(http.StatusOK, renderError(ErrWrongProductConfig, err))
-		return
-	}
-
-	data, err := c.StatusToMap(statusreply.Status)
-	if err != nil {
-		r.JSON(http.StatusOK, renderError(ErrWrongStatusFormat, err))
+		r.JSON(http.StatusOK, renderError(ErrWrongRequestFormat, err))
 		return
 	}
 	result := DeviceStatusResponse{
-		Data: data,
+		Data: status,
 	}
 
 	r.JSON(http.StatusOK, result)
@@ -138,58 +111,27 @@ func GetDeviceLatestStatus() {
 
 }
 
-func SetDeviceStatus(urlparams martini.Params, req *http.Request, r render.Render) {
-	identifier := urlparams["identifier"]
-	server.Log.Printf("ACTION GetDeviceCurrentStatus, identifier:: %v", identifier)
-
-	device := &models.Device{}
-	err := server.RPCCallByName("registry", "Registry.FindDeviceByIdentifier", identifier, device)
-	if err != nil {
-		r.JSON(http.StatusOK, renderError(ErrDeviceNotFound, err))
-		return
-	}
-
-	onlineargs := rpcs.ArgsGetDeviceOnlineStatus{
-		Id: uint64(device.ID),
-	}
-	onlinereply := rpcs.ReplyGetDeviceOnlineStatus{}
-	err = server.RPCCallByName("devicemanager", "DeviceManager.GetDeviceOnlineStatus", onlineargs, &onlinereply)
-	if err != nil {
-		server.Log.Errorf("get devie online status error: %v", err)
-		r.JSON(http.StatusOK, renderError(ErrDeviceNotOnline, err))
-		return
-	}
+func SetDeviceStatus(device *models.Device, config *productconfig.ProductConfig,
+	urlparams martini.Params, req *http.Request, r render.Render) {
+	server.Log.Printf("ACTION GetDeviceCurrentStatus, identifier:: %v,request: %v", device.DeviceIdentifier, req.Body)
 
 	var args interface{}
 	decoder := json.NewDecoder(req.Body)
-	err = decoder.Decode(&args)
+	err := decoder.Decode(&args)
 	if err != nil {
-		r.JSON(http.StatusOK, renderError(ErrWrongStatusFormat, err))
-		return
-	}
-
-	product := &models.Product{}
-	err = server.RPCCallByName("registry", "Registry.FindProduct", device.ProductID, product)
-	if err != nil {
-		r.JSON(http.StatusOK, renderError(ErrProductNotFound, err))
-		return
-	}
-
-	c, err := productconfig.New(product.ProductConfig)
-	if err != nil {
-		r.JSON(http.StatusOK, renderError(ErrWrongProductConfig, err))
+		r.JSON(http.StatusOK, renderError(ErrWrongRequestFormat, err))
 		return
 	}
 
 	m, ok := args.(map[string]interface{})
 	if !ok {
-		r.JSON(http.StatusOK, renderError(ErrWrongStatusFormat, err))
+		r.JSON(http.StatusOK, renderError(ErrWrongRequestFormat, err))
 		return
 	}
 
-	status, err := c.MapToStatus(m)
+	status, err := config.MapToStatus(m)
 	if err != nil {
-		r.JSON(http.StatusOK, renderError(ErrWrongStatusFormat, err))
+		r.JSON(http.StatusOK, renderError(ErrWrongRequestFormat, err))
 		return
 	}
 
@@ -201,6 +143,53 @@ func SetDeviceStatus(urlparams martini.Params, req *http.Request, r render.Rende
 	err = server.RPCCallByName("controller", "Controller.SetStatus", statusargs, &statusreply)
 	if err != nil {
 		server.Log.Errorf("set devie status error: %v", err)
+		r.JSON(http.StatusOK, renderError(ErrSystemFault, err))
+		return
+	}
+
+	r.JSON(http.StatusOK, Common{})
+	return
+
+}
+
+func SendCommandToDevice(device *models.Device, config *productconfig.ProductConfig,
+	urlparams martini.Params, req *http.Request, r render.Render) {
+	timeout := req.URL.Query().Get("timeout")
+
+	server.Log.Printf("ACTION SendCommandToDevice, identifier:: %v, request: %v, timeout: %v",
+		device.DeviceIdentifier, req.Body, timeout)
+
+	var args interface{}
+	decoder := json.NewDecoder(req.Body)
+	err := decoder.Decode(&args)
+	if err != nil {
+		r.JSON(http.StatusOK, renderError(ErrWrongRequestFormat, err))
+		return
+	}
+
+	m, ok := args.(map[string]interface{})
+	if !ok {
+		r.JSON(http.StatusOK, renderError(ErrWrongRequestFormat, err))
+		return
+	}
+
+	command, err := config.MapToCommand(m)
+	if err != nil {
+		r.JSON(http.StatusOK, renderError(ErrWrongRequestFormat, err))
+		return
+	}
+
+	cmdargs := rpcs.ArgsSendCommand{
+		DeviceId:  uint64(device.ID),
+		SubDevice: uint16(command.Head.SubDeviceid),
+		No:        uint16(command.Head.No),
+		WaitTime:  uint32(defaultTimeOut),
+		Params:    command.Params,
+	}
+	cmdreply := rpcs.ReplySendCommand{}
+	err = server.RPCCallByName("controller", "Controller.SendCommand", cmdargs, &cmdreply)
+	if err != nil {
+		server.Log.Errorf("send devie command error: %v", err)
 		r.JSON(http.StatusOK, renderError(ErrSystemFault, err))
 		return
 	}

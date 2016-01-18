@@ -188,6 +188,44 @@ App-Key: 4d3e3e2e4d3e3e2e4d3e3e2e4d3e3e2e...
 }
 ```
 
+#### 向设备发送命令
+*请求方式*
+
+```
+POST
+```
+*请求URL*
+
+```
+/application/v1/devices/{identifer}/commands
+```
+> 说明{identifier}替换为设备标识符
+
+*请求头*
+
+```
+App-Key: 4d3e3e2e4d3e3e2e4d3e3e2e4d3e3e2e...
+```
+*参数*
+
+```
+无
+```
+*请求内容*
+
+``` javascript
+{
+  "command命令名": [参数1,参数2...]
+}
+```
+*返回JSON示例*
+
+``` javascript
+{
+  "code": 0, //返回码
+  "message": "", //正确或错误信息
+}
+```
 
 ### webhook回调接口列表
 #### 设备事件上报
