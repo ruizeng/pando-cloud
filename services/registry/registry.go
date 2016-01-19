@@ -29,6 +29,50 @@ func NewRegistry() (*Registry, error) {
 	}, nil
 }
 
+func setVendor(target *models.Vendor, src *models.Vendor) {
+	target.ID = src.ID
+	target.VendorName = src.VendorName
+	target.VendorDescription = src.VendorDescription
+	target.VendorKey = src.VendorKey
+	target.CreatedAt = src.CreatedAt
+	target.UpdatedAt = src.UpdatedAt
+}
+
+func setProduct(target *models.Product, src *models.Product) {
+	target.ID = src.ID
+	target.ProductName = src.ProductName
+	target.ProductDescription = src.ProductDescription
+	target.ProductKey = src.ProductKey
+	target.ProductConfig = src.ProductConfig
+	target.CreatedAt = src.CreatedAt
+	target.UpdatedAt = src.UpdatedAt
+}
+
+func setApplication(target *models.Application, src *models.Application) {
+	target.ID = src.ID
+	target.AppName = src.AppName
+	target.AppDescription = src.AppDescription
+	target.AppKey = src.AppKey
+	target.ReportUrl = src.ReportUrl
+	target.AppToken = src.AppToken
+	target.AppDomain = src.AppDomain
+	target.CreatedAt = src.CreatedAt
+	target.UpdatedAt = src.UpdatedAt
+}
+
+func setDevice(target *models.Device, src *models.Device) {
+	target.ID = src.ID
+	target.ProductID = src.ProductID
+	target.DeviceIdentifier = src.DeviceIdentifier
+	target.DeviceSecret = src.DeviceIdentifier
+	target.DeviceKey = src.DeviceKey
+	target.DeviceName = src.DeviceName
+	target.DeviceDescription = src.DeviceDescription
+	target.DeviceVersion = src.DeviceVersion
+	target.CreatedAt = src.CreatedAt
+	target.UpdatedAt = src.UpdatedAt
+}
+
 // SaveVendor will create a vendor if the ID field is not initialized
 // if ID field is initialized, it will update the conresponding vendor.
 func (r *Registry) SaveVendor(vendor *models.Vendor, reply *models.Vendor) error {
@@ -63,12 +107,7 @@ func (r *Registry) SaveVendor(vendor *models.Vendor, reply *models.Vendor) error
 		cache.Delete(cacheKey)
 	}
 
-	reply.ID = vendor.ID
-	reply.VendorName = vendor.VendorName
-	reply.VendorDescription = vendor.VendorDescription
-	reply.VendorKey = vendor.VendorKey
-	reply.CreatedAt = vendor.CreatedAt
-	reply.UpdatedAt = vendor.UpdatedAt
+	setVendor(reply, vendor)
 
 	return nil
 }
@@ -107,13 +146,7 @@ func (r *Registry) SaveProduct(product *models.Product, reply *models.Product) e
 		cache.Delete(cacheKey)
 	}
 
-	reply.ID = product.ID
-	reply.ProductName = product.ProductName
-	reply.ProductDescription = product.ProductDescription
-	reply.ProductKey = product.ProductKey
-	reply.ProductConfig = product.ProductConfig
-	reply.CreatedAt = product.CreatedAt
-	reply.UpdatedAt = product.UpdatedAt
+	setProduct(reply, product)
 
 	return nil
 }
@@ -151,15 +184,7 @@ func (r *Registry) SaveApplication(app *models.Application, reply *models.Applic
 		cache.Delete(cacheKey)
 	}
 
-	reply.ID = app.ID
-	reply.AppName = app.AppName
-	reply.AppDescription = app.AppDescription
-	reply.AppKey = app.AppKey
-	reply.ReportUrl = app.ReportUrl
-	reply.AppToken = app.AppToken
-	reply.AppDomain = app.AppDomain
-	reply.CreatedAt = app.CreatedAt
-	reply.UpdatedAt = app.UpdatedAt
+	setApplication(reply, app)
 
 	return nil
 }
@@ -180,7 +205,8 @@ func (r *Registry) ValidateApplication(key string, reply *models.Application) er
 	cache := getCache()
 	cacheKey := fmt.Sprintf("Application:%v", id)
 	if cacheValue, ok := cache.Get(cacheKey); ok {
-		reply = cacheValue.(*models.Application)
+		app := cacheValue.(*models.Application)
+		setApplication(reply, app)
 	} else {
 		err = db.First(reply, id).Error
 		if err != nil {
@@ -208,7 +234,8 @@ func (r *Registry) FindVendor(id int32, reply *models.Vendor) error {
 	cache := getCache()
 	cacheKey := fmt.Sprintf("Vendor:%v", id)
 	if cacheValue, ok := cache.Get(cacheKey); ok {
-		reply = cacheValue.(*models.Vendor)
+		vendor := cacheValue.(*models.Vendor)
+		setVendor(reply, vendor)
 	} else {
 		err = db.First(reply, id).Error
 		if err != nil {
@@ -262,7 +289,8 @@ func (r *Registry) FindProduct(id int32, reply *models.Product) error {
 	cache := getCache()
 	cacheKey := fmt.Sprintf("Product:%v", id)
 	if cacheValue, ok := cache.Get(cacheKey); ok {
-		reply = cacheValue.(*models.Product)
+		product := cacheValue.(*models.Product)
+		setProduct(reply, product)
 	} else {
 		err = db.First(reply, id).Error
 		if err != nil {
@@ -286,7 +314,8 @@ func (r *Registry) FindApplication(id int32, reply *models.Application) error {
 	cache := getCache()
 	cacheKey := fmt.Sprintf("Application:%v", id)
 	if cacheValue, ok := cache.Get(cacheKey); ok {
-		reply = cacheValue.(*models.Application)
+		app := cacheValue.(*models.Application)
+		setApplication(reply, app)
 	} else {
 		err = db.First(reply, id).Error
 		if err != nil {
@@ -316,7 +345,8 @@ func (r *Registry) ValidateProduct(key string, reply *models.Product) error {
 	cache := getCache()
 	cacheKey := fmt.Sprintf("Product:%v", id)
 	if cacheValue, ok := cache.Get(cacheKey); ok {
-		reply = cacheValue.(*models.Product)
+		product := cacheValue.(*models.Product)
+		setProduct(reply, product)
 	} else {
 		err = db.First(reply, id).Error
 		if err != nil {
@@ -384,7 +414,7 @@ func (r *Registry) RegisterDevice(args *rpcs.ArgsDeviceRegister, reply *models.D
 		if _, ok := cache.Get(cacheKey); ok {
 			cache.Delete(cacheKey)
 		}
-		
+
 		// device has aleady been saved. just update version info.
 		reply.DeviceVersion = args.DeviceVersion
 		err = db.Save(reply).Error
@@ -407,7 +437,8 @@ func (r *Registry) FindDeviceByIdentifier(identifier string, reply *models.Devic
 	cache := getCache()
 	cacheKey := fmt.Sprintf("Device:%v", identifier)
 	if cacheValue, ok := cache.Get(identifier); ok {
-		reply = cacheValue.(*models.Device)
+		device := cacheValue.(*models.Device)
+		setDevice(reply, device)
 	} else {
 		err = db.Where(&models.Device{
 			DeviceIdentifier: identifier,
@@ -470,7 +501,7 @@ func (r *Registry) UpdateDeviceInfo(args *rpcs.ArgsDeviceUpdate, reply *models.D
 	if err != nil {
 		return err
 	}
-	
+
 	//delete cache
 	cache := getCache()
 	cacheKey := fmt.Sprintf("Device:%v", args.DeviceIdentifier)
