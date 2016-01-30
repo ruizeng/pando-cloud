@@ -1,4 +1,4 @@
-docker#!/bin/sh
+#!/bin/sh
 
 # restore dependency packages. 
 cd $GOPATH/src/github.com/PandoCloud/pando-cloud
