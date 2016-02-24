@@ -47,6 +47,7 @@ func NewNotifier(rabbithost string) (*Notifier, error) {
 	return &Notifier{
 		eventsQueue: eq,
 		statusQueue: sq,
+		apps:        []*models.Application{},
 	}, nil
 }
 
