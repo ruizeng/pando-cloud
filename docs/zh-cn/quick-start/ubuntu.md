@@ -103,14 +103,7 @@ sudo apt-get install mongodb -y
 #### RabbitMQ
 
 ```sh
-sudo apt-get install erlang-nox -y
-```
-
-> RabbitMQ依赖erlang，安装前更新apt仓库，防止erlang版本过旧。
-
-```sh
-wget  http://www.rabbitmq.com/releases/rabbitmq-server/v3.6.0/rabbitmq-server_3.6.0-1_all.deb
-sudo dpkg -i rabbitmq-server_3.6.0-1_all.deb
+sudo apt-get install rabbitmq-server -y
 ```
 
 #### Etcd
