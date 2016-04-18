@@ -118,7 +118,6 @@ func (c *Connection) Close() {
 		close(c.SendChan)
 		c.SendChan = nil
 	}
-	c.Mgr.DelConn(deviceid)
 	c.Mgr.Provider.OnDeviceOffline(deviceid)
 }
 
