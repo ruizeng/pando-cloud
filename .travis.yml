@@ -8,7 +8,6 @@ services:
 before_install:
   - go get github.com/modocache/gover
   - go get github.com/mattn/goveralls
-  - go get github.com/coreos/etcd
   - curl -L  https://github.com/coreos/etcd/releases/download/v2.3.1/etcd-v2.3.1-linux-amd64.tar.gz -o etcd-v2.3.1-linux-amd64.tar.gz
   - tar xzvf etcd-v2.3.1-linux-amd64.tar.gz
   - cp etcd-v2.3.1-linux-amd64/etcd $HOME/gopath/bin
