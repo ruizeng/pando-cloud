@@ -40,5 +40,5 @@ func getDB() (*gorm.DB, error) {
 	}
 	gormdb.SingularTable(true)
 	gormdb.LogMode(true)
-	return &gormdb, nil
+	return gormdb, nil
 }

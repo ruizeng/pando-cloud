@@ -55,12 +55,11 @@
 		},
 		{
 			"ImportPath": "github.com/jinzhu/gorm",
-			"Rev": "5f113dcb8d8d2c0968ae9c867ab01cd3a783585a"
+			"Rev": "5174cc5c242a728b435ea2be8a2f7f998e15429b"
 		},
 		{
-			"ImportPath": "github.com/lib/pq/hstore",
-			"Comment": "go1.0-cutoff-61-g83c4f41",
-			"Rev": "83c4f410d0aed80a0f44bac6a576a7f2435791f3"
+			"ImportPath": "github.com/jinzhu/inflection",
+			"Rev": "3272df6c21d04180007eb3349844c89a3856bc25"
 		},
 		{
 			"ImportPath": "github.com/martini-contrib/binding",
@@ -77,10 +76,6 @@
 		{
 			"ImportPath": "github.com/pborman/uuid",
 			"Rev": "cccd189d45f7ac3368a0d127efb7f4d08ae0b655"
-		},
-		{
-			"ImportPath": "github.com/qor/inflection",
-			"Rev": "3272df6c21d04180007eb3349844c89a3856bc25"
 		},
 		{
 			"ImportPath": "github.com/streadway/amqp",

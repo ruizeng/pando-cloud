@@ -7,40 +7,54 @@ import (
 	"strings"
 )
 
+// JoinTableHandlerInterface is an interface for how to handle many2many relations
 type JoinTableHandlerInterface interface {
+	// initialize join table handler
 	Setup(relationship *Relationship, tableName string, source reflect.Type, destination reflect.Type)
+	// Table return join table's table name
 	Table(db *DB) string
+	// Add create relationship in join table for source and destination
 	Add(handler JoinTableHandlerInterface, db *DB, source interface{}, destination interface{}) error
+	// Delete delete relationship in join table for sources
 	Delete(handler JoinTableHandlerInterface, db *DB, sources ...interface{}) error
+	// JoinWith query with `Join` conditions
 	JoinWith(handler JoinTableHandlerInterface, db *DB, source interface{}) *DB
+	// SourceForeignKeys return source foreign keys
 	SourceForeignKeys() []JoinTableForeignKey
+	// DestinationForeignKeys return destination foreign keys
 	DestinationForeignKeys() []JoinTableForeignKey
 }
 
+// JoinTableForeignKey join table foreign key struct
 type JoinTableForeignKey struct {
 	DBName            string
 	AssociationDBName string
 }
 
+// JoinTableSource is a struct that contains model type and foreign keys
 type JoinTableSource struct {
 	ModelType   reflect.Type
 	ForeignKeys []JoinTableForeignKey
 }
 
+// JoinTableHandler default join table handler
 type JoinTableHandler struct {
 	TableName   string          `sql:"-"`
 	Source      JoinTableSource `sql:"-"`
 	Destination JoinTableSource `sql:"-"`
 }
 
+// SourceForeignKeys return source foreign keys
 func (s *JoinTableHandler) SourceForeignKeys() []JoinTableForeignKey {
 	return s.Source.ForeignKeys
 }
 
+// DestinationForeignKeys return destination foreign keys
 func (s *JoinTableHandler) DestinationForeignKeys() []JoinTableForeignKey {
 	return s.Destination.ForeignKeys
 }
 
+// Setup initialize a default join table handler
 func (s *JoinTableHandler) Setup(relationship *Relationship, tableName string, source reflect.Type, destination reflect.Type) {
 	s.TableName = tableName
 
@@ -61,11 +75,12 @@ func (s *JoinTableHandler) Setup(relationship *Relationship, tableName string, s
 	}
 }
 
+// Table return join table's table name
 func (s JoinTableHandler) Table(db *DB) string {
 	return s.TableName
 }
 
-func (s JoinTableHandler) GetSearchMap(db *DB, sources ...interface{}) map[string]interface{} {
+func (s JoinTableHandler) getSearchMap(db *DB, sources ...interface{}) map[string]interface{} {
 	values := map[string]interface{}{}
 
 	for _, source := range sources {
@@ -74,25 +89,30 @@ func (s JoinTableHandler) GetSearchMap(db *DB, sources ...interface{}) map[strin
 
 		if s.Source.ModelType == modelType {
 			for _, foreignKey := range s.Source.ForeignKeys {
-				values[foreignKey.DBName] = scope.Fields()[foreignKey.AssociationDBName].Field.Interface()
+				if field, ok := scope.FieldByName(foreignKey.AssociationDBName); ok {
+					values[foreignKey.DBName] = field.Field.Interface()
+				}
 			}
 		} else if s.Destination.ModelType == modelType {
 			for _, foreignKey := range s.Destination.ForeignKeys {
-				values[foreignKey.DBName] = scope.Fields()[foreignKey.AssociationDBName].Field.Interface()
+				if field, ok := scope.FieldByName(foreignKey.AssociationDBName); ok {
+					values[foreignKey.DBName] = field.Field.Interface()
+				}
 			}
 		}
 	}
 	return values
 }
 
-func (s JoinTableHandler) Add(handler JoinTableHandlerInterface, db *DB, source1 interface{}, source2 interface{}) error {
+// Add create relationship in join table for source and destination
+func (s JoinTableHandler) Add(handler JoinTableHandlerInterface, db *DB, source interface{}, destination interface{}) error {
 	scope := db.NewScope("")
-	searchMap := s.GetSearchMap(db, source1, source2)
+	searchMap := s.getSearchMap(db, source, destination)
 
 	var assignColumns, binVars, conditions []string
 	var values []interface{}
 	for key, value := range searchMap {
-		assignColumns = append(assignColumns, key)
+		assignColumns = append(assignColumns, scope.Quote(key))
 		binVars = append(binVars, `?`)
 		conditions = append(conditions, fmt.Sprintf("%v = ?", scope.Quote(key)))
 		values = append(values, value)
@@ -102,7 +122,7 @@ func (s JoinTableHandler) Add(handler JoinTableHandlerInterface, db *DB, source1
 		values = append(values, value)
 	}
 
-	quotedTable := handler.Table(db)
+	quotedTable := scope.Quote(handler.Table(db))
 	sql := fmt.Sprintf(
 		"INSERT INTO %v (%v) SELECT %v %v WHERE NOT EXISTS (SELECT * FROM %v WHERE %v)",
 		quotedTable,
@@ -116,30 +136,36 @@ func (s JoinTableHandler) Add(handler JoinTableHandlerInterface, db *DB, source1
 	return db.Exec(sql, values...).Error
 }
 
+// Delete delete relationship in join table for sources
 func (s JoinTableHandler) Delete(handler JoinTableHandlerInterface, db *DB, sources ...interface{}) error {
-	var conditions []string
-	var values []interface{}
+	var (
+		scope      = db.NewScope(nil)
+		conditions []string
+		values     []interface{}
+	)
 
-	for key, value := range s.GetSearchMap(db, sources...) {
-		conditions = append(conditions, fmt.Sprintf("%v = ?", key))
+	for key, value := range s.getSearchMap(db, sources...) {
+		conditions = append(conditions, fmt.Sprintf("%v = ?", scope.Quote(key)))
 		values = append(values, value)
 	}
 
 	return db.Table(handler.Table(db)).Where(strings.Join(conditions, " AND "), values...).Delete("").Error
 }
 
+// JoinWith query with `Join` conditions
 func (s JoinTableHandler) JoinWith(handler JoinTableHandlerInterface, db *DB, source interface{}) *DB {
-	quotedTable := handler.Table(db)
+	var (
+		scope           = db.NewScope(source)
+		tableName       = handler.Table(db)
+		quotedTableName = scope.Quote(tableName)
+		joinConditions  []string
+		values          []interface{}
+	)
 
-	scope := db.NewScope(source)
-	modelType := scope.GetModelStruct().ModelType
-	var joinConditions []string
-	var queryConditions []string
-	var values []interface{}
-	if s.Source.ModelType == modelType {
+	if s.Source.ModelType == scope.GetModelStruct().ModelType {
 		destinationTableName := db.NewScope(reflect.New(s.Destination.ModelType).Interface()).QuotedTableName()
 		for _, foreignKey := range s.Destination.ForeignKeys {
-			joinConditions = append(joinConditions, fmt.Sprintf("%v.%v = %v.%v", quotedTable, scope.Quote(foreignKey.DBName), destinationTableName, scope.Quote(foreignKey.AssociationDBName)))
+			joinConditions = append(joinConditions, fmt.Sprintf("%v.%v = %v.%v", quotedTableName, scope.Quote(foreignKey.DBName), destinationTableName, scope.Quote(foreignKey.AssociationDBName)))
 		}
 
 		var foreignDBNames []string
@@ -147,22 +173,32 @@ func (s JoinTableHandler) JoinWith(handler JoinTableHandlerInterface, db *DB, so
 
 		for _, foreignKey := range s.Source.ForeignKeys {
 			foreignDBNames = append(foreignDBNames, foreignKey.DBName)
-			foreignFieldNames = append(foreignFieldNames, scope.Fields()[foreignKey.AssociationDBName].Name)
+			if field, ok := scope.FieldByName(foreignKey.AssociationDBName); ok {
+				foreignFieldNames = append(foreignFieldNames, field.Name)
+			}
 		}
 
-		foreignFieldValues := scope.getColumnAsArray(foreignFieldNames)
+		foreignFieldValues := scope.getColumnAsArray(foreignFieldNames, scope.Value)
 
-		condString := fmt.Sprintf("%v in (%v)", toQueryCondition(scope, foreignDBNames), toQueryMarks(foreignFieldValues))
+		var condString string
+		if len(foreignFieldValues) > 0 {
+			var quotedForeignDBNames []string
+			for _, dbName := range foreignDBNames {
+				quotedForeignDBNames = append(quotedForeignDBNames, tableName+"."+dbName)
+			}
 
-		keys := scope.getColumnAsArray(foreignFieldNames)
-		values = append(values, toQueryValues(keys))
+			condString = fmt.Sprintf("%v IN (%v)", toQueryCondition(scope, quotedForeignDBNames), toQueryMarks(foreignFieldValues))
 
-		queryConditions = append(queryConditions, condString)
+			keys := scope.getColumnAsArray(foreignFieldNames, scope.Value)
+			values = append(values, toQueryValues(keys))
+		} else {
+			condString = fmt.Sprintf("1 <> 1")
+		}
 
-		return db.Joins(fmt.Sprintf("INNER JOIN %v ON %v", quotedTable, strings.Join(joinConditions, " AND "))).
+		return db.Joins(fmt.Sprintf("INNER JOIN %v ON %v", quotedTableName, strings.Join(joinConditions, " AND "))).
 			Where(condString, toQueryValues(foreignFieldValues)...)
-	} else {
-		db.Error = errors.New("wrong source type for join table handler")
-		return db
 	}
+
+	db.Error = errors.New("wrong source type for join table handler")
+	return db
 }
