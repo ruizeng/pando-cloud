@@ -22,18 +22,18 @@
 		},
 		{
 			"ImportPath": "github.com/coreos/etcd/client",
-			"Comment": "v2.3.0-alpha.0-151-g9220a47",
-			"Rev": "9220a47c3097f980d70a2982af4beeb990499662"
+			"Comment": "v2.3.0-467-gc4892c7",
+			"Rev": "c4892c7f51147fac99f0eb475989bee402a50fca"
 		},
 		{
 			"ImportPath": "github.com/coreos/etcd/pkg/pathutil",
-			"Comment": "v2.3.0-alpha.0-151-g9220a47",
-			"Rev": "9220a47c3097f980d70a2982af4beeb990499662"
+			"Comment": "v2.3.0-467-gc4892c7",
+			"Rev": "c4892c7f51147fac99f0eb475989bee402a50fca"
 		},
 		{
 			"ImportPath": "github.com/coreos/etcd/pkg/types",
-			"Comment": "v2.3.0-alpha.0-151-g9220a47",
-			"Rev": "9220a47c3097f980d70a2982af4beeb990499662"
+			"Comment": "v2.3.0-467-gc4892c7",
+			"Rev": "c4892c7f51147fac99f0eb475989bee402a50fca"
 		},
 		{
 			"ImportPath": "github.com/garyburd/redigo/internal",
@@ -76,6 +76,11 @@
 		{
 			"ImportPath": "github.com/pborman/uuid",
 			"Rev": "cccd189d45f7ac3368a0d127efb7f4d08ae0b655"
+		},
+		{
+			"ImportPath": "github.com/robfig/cron",
+			"Comment": "v1-16-g0f39cf7",
+			"Rev": "0f39cf7ebc65a602f45692f9894bd6a193faf8fa"
 		},
 		{
 			"ImportPath": "github.com/streadway/amqp",
