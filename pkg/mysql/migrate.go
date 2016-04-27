@@ -35,6 +35,7 @@ func MigrateDatabase(dbhost, dbport, dbname, dbuser, dbpass string) error {
 		&models.Product{},
 		&models.Vendor{},
 		&models.Application{},
+		&models.Rule{},
 	)
 
 	return nil

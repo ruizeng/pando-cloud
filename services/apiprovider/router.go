@@ -33,4 +33,9 @@ func route(m *martini.ClassicMartini) {
 		ApplicationAuthOnDeviceIdentifer, CheckDeviceOnline, CheckProductConfig,
 		SendCommandToDevice)
 
+	// and a rule to device
+	m.Post("/application/v1/devices/:identifier/rules",
+		ApplicationAuthOnDeviceIdentifer, CheckDeviceIdentifier,
+		AddRule)
+
 }

@@ -25,6 +25,10 @@ func main() {
 		return
 	}
 
+	// timer
+	t := NewTimer()
+	t.Run()
+
 	// start to run
 	err = server.Run()
 	if err != nil {

@@ -134,7 +134,9 @@ App-Key: 4d3e3e2e4d3e3e2e4d3e3e2e4d3e3e2e...
 
 ```
 无
-```*返回JSON示例*
+```
+
+*返回JSON示例*
 
 ``` javascript
 {
@@ -173,6 +175,7 @@ App-Key: 4d3e3e2e4d3e3e2e4d3e3e2e4d3e3e2e...
 无
 ```
 *请求内容*
+
 ``` javascript
 {
   "object1":[1, 23, 12, 9], //对象中数据值，设置一个或多个同时设置
@@ -181,6 +184,7 @@ App-Key: 4d3e3e2e4d3e3e2e4d3e3e2e4d3e3e2e...
 }
 ```
 *返回JSON示例*
+
 ``` javascript
 {
   "code": 0, //返回码
@@ -209,15 +213,79 @@ App-Key: 4d3e3e2e4d3e3e2e4d3e3e2e4d3e3e2e...
 *参数*
 
 ```
+```
+
+*请求内容*
+
+``` 
+{
+  "command命令名": [参数1,参数2...]
+}
+```
+
+*返回JSON示例*
+
+``` javascript
+{
+  "code": 0, //返回码
+  "message": "", //正确或错误信息
+}
+```
+
+#### 为设备添加规则
+*请求方式*
+
+```
+POST
+```
+*请求URL*
+
+```
+/application/v1/devices/{identifer}/rules
+```
+> 说明{identifier}替换为设备标识符
+
+*请求头*
+
+```
+App-Key: 4d3e3e2e4d3e3e2e4d3e3e2e4d3e3e2e...
+```
+*参数*
+
+```
 无
 ```
 *请求内容*
 
 ``` javascript
 {
-  "command命令名": [参数1,参数2...]
+  "type": "timer" // timer 或者 ifttt
+  "trigger": "",
+  "target": "",
+  "action": ""
 }
 ```
+*附加说明*
+##### type
+可以指定规则的形式，type不同，其他参数格式也会有所区别。目前支持`timer`和`ifttt`两种：
+
+* `timmer`： 可以通过计划任务的方式设定指定时间循环执行某任务
+* `ifttt`: 可以设置自动联动，某个设备的状态变化可以触发向其他设备发送指令或设置状态等。
+
+##### trigger
+在何种情况触发该规则。
+
+* `type==timer`: 符合[crontab](https://zh.wikipedia.org/wiki/Cron)格式，如`0 0 * * *`表示每天0点触发，详细参考[crontab时间设置](https://zh.wikipedia.org/wiki/Cron#.E6.97.B6.E9.97.B4.E8.AE.BE.E7.BD.AE)。
+* `type==ifttt`: ifttt触发条件，如`status[name][1] > 100`
+
+##### target
+以`/`分割的URI地址，如`device/{identifer}/command`或`device/{identifier}/status`，格式类似URL（但不完全相同，请注意区分，第一位没有`/`,`device`和`command`为单数形式）
+
+##### action
+JSON格式的字符串，如`{"command命令名": [参数1,参数2...]}` 或`{"object1":[1, 23, 12, 9]}`, command或status的格式参考设置设备状态和发送设备命令，格式完全相同。
+
+##### ifttt
+
 *返回JSON示例*
 
 ``` javascript
@@ -229,19 +297,24 @@ App-Key: 4d3e3e2e4d3e3e2e4d3e3e2e4d3e3e2e...
 
 ### webhook回调接口列表
 #### 设备事件上报
+
 *请求方式*
+
 ```
 POST
 ```
 *请求头*
+
 ```
 App-Token: 4d3e3e2e4d3e3e2e4d3e3e2e4d3e3e2e...
 ```
 *参数*
+
 ```
 无
 ```
 *请求内容JSON示例*
+
 ``` javascript
 {
   "tag": "event",
@@ -255,18 +328,22 @@ App-Token: 4d3e3e2e4d3e3e2e4d3e3e2e4d3e3e2e...
 
 #### 设备状态上报
 *请求方式：*
+
 ```
 POST
 ```
 *请求头*
+
 ```
 App-Token: 4d3e3e2e4d3e3e2e4d3e3e2e4d3e3e2e...
 ```
 *参数*
+
 ```
 无
 ```
 *请求内容JSON示例*
+
 ``` javascript
 {
   "tag": "status",
@@ -289,7 +366,7 @@ App-Token: 4d3e3e2e4d3e3e2e4d3e3e2e4d3e3e2e...
 | 10002        |   产品不存在   |
 | 10003        |   设备不存在   |
 | 10004        |   设备当前不在线   |
-| 10005        |   错误的设备状态请求格式   |
+| 10005        |   错误的请求格式   |
 | 10006        |   错误的产品配置   |
 | 10007        |   错误的请求格式   |
 | 10008        |   无权访问   |

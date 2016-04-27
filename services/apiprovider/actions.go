@@ -198,3 +198,33 @@ func SendCommandToDevice(device *models.Device, config *productconfig.ProductCon
 	return
 
 }
+
+func AddRule(device *models.Device, req *http.Request, r render.Render) {
+	var ruleReq CreateRuleRequest
+	decoder := json.NewDecoder(req.Body)
+	err := decoder.Decode(&ruleReq)
+	if err != nil {
+		r.JSON(http.StatusOK, renderError(ErrWrongRequestFormat, err))
+		return
+	}
+
+	rule := &models.Rule{
+		DeviceID: device.ID,
+		RuleType: ruleReq.Type,
+		Trigger:  ruleReq.Trigger,
+		Target:   ruleReq.Target,
+		Action:   ruleReq.Action,
+	}
+	reply := &rpcs.ReplyEmptyResult{}
+
+	err = server.RPCCallByName("registry", "Registry.CreateRule", rule, reply)
+	if err != nil {
+		server.Log.Errorf("create device rule error: %v", err)
+		r.JSON(http.StatusOK, renderError(ErrSystemFault, err))
+		return
+	}
+
+	r.JSON(http.StatusOK, Common{})
+	return
+
+}

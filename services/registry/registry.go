@@ -519,3 +519,28 @@ func (r *Registry) UpdateDeviceInfo(args *rpcs.ArgsDeviceUpdate, reply *models.D
 
 	return nil
 }
+
+// createRule create a new rule with specified parameters.
+func (r *Registry) CreateRule(args *models.Rule, reply *rpcs.ReplyEmptyResult) error {
+	db, err := getDB()
+	if err != nil {
+		return err
+	}
+
+	return db.Save(args).Error
+}
+
+// queryRules queries rules by trigger and rule type.
+func (r *Registry) QueryRules(args *models.Rule, reply *[]models.Rule) error {
+	db, err := getDB()
+	if err != nil {
+		return err
+	}
+
+	err = db.Where(args).Find(reply).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

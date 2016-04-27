@@ -113,6 +113,20 @@ func CheckDeviceOnline(context martini.Context, params martini.Params, req *http
 	context.Map(device)
 }
 
+// get device identifier
+func CheckDeviceIdentifier(context martini.Context, params martini.Params, req *http.Request, r render.Render) {
+	identifier := params["identifier"]
+
+	device := &models.Device{}
+	err := server.RPCCallByName("registry", "Registry.FindDeviceByIdentifier", identifier, device)
+	if err != nil {
+		r.JSON(http.StatusOK, renderError(ErrDeviceNotFound, err))
+		return
+	}
+
+	context.Map(device)
+}
+
 // check if proudct is ok and map a product config to context, must by called after CheckDevice
 func CheckProductConfig(context martini.Context, device *models.Device,
 	params martini.Params, req *http.Request, r render.Render) {
