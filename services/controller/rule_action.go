@@ -36,24 +36,22 @@ func performRuleAction(target string, action string) error {
 		return err
 	}
 
+	var args interface{}
+	err = json.Unmarshal([]byte(action), &args)
+	if err != nil {
+		server.Log.Errorf("marshal action error: %v", err)
+		return err
+	}
+
+	m, ok := args.(map[string]interface{})
+	if !ok {
+		server.Log.Errorf("decode action error:%v", err)
+		return fmt.Errorf("decode action error:%v", err)
+	}
+
 	sendType := parts[2]
 	switch sendType {
 	case "command":
-		var args interface{}
-		err := json.Unmarshal([]byte(action), &args)
-		if err != nil {
-			server.Log.Errorf("marshal action error: %v", err)
-			return err
-		}
-
-		server.Log.Debugf(": %v", args)
-
-		m, ok := args.(map[string]interface{})
-		if !ok {
-			server.Log.Errorf("decode action error:%v", err)
-			return fmt.Errorf("decode action error:%v", err)
-		}
-
 		command, err := config.MapToCommand(m)
 		if err != nil {
 			server.Log.Errorf("action format error: %v", err)
@@ -74,7 +72,21 @@ func performRuleAction(target string, action string) error {
 			return err
 		}
 	case "status":
+		status, err := config.MapToStatus(m)
+		if err != nil {
+			return err
+		}
 
+		statusargs := rpcs.ArgsSetStatus{
+			DeviceId: uint64(device.ID),
+			Status:   status,
+		}
+		statusreply := rpcs.ReplySetStatus{}
+		err = server.RPCCallByName("controller", "Controller.SetStatus", statusargs, &statusreply)
+		if err != nil {
+			server.Log.Errorf("set devie status error: %v", err)
+			return err
+		}
 	default:
 		server.Log.Errorf("wrong action %v", action)
 	}
