@@ -1,5 +1,5 @@
 // suport cron like schedule tasks.
-package main
+package rule
 
 import (
 	"fmt"

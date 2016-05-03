@@ -4,6 +4,7 @@ import (
 	"github.com/PandoCloud/pando-cloud/pkg/mongo"
 	"github.com/PandoCloud/pando-cloud/pkg/queue"
 	"github.com/PandoCloud/pando-cloud/pkg/rpcs"
+	"github.com/PandoCloud/pando-cloud/pkg/rule"
 	"github.com/PandoCloud/pando-cloud/pkg/server"
 )
 
@@ -19,6 +20,8 @@ type Controller struct {
 	dataRecorder    *mongo.Recorder
 	eventsQueue     *queue.Queue
 	statusQueue     *queue.Queue
+	timer           *rule.Timer
+	ift             *rule.Ifttt
 }
 
 func NewController(mongohost string, rabbithost string) (*Controller, error) {
@@ -47,12 +50,21 @@ func NewController(mongohost string, rabbithost string) (*Controller, error) {
 		return nil, err
 	}
 
+	// timer
+	t := rule.NewTimer()
+	t.Run()
+
+	// ifttt
+	ttt := rule.NewIfttt()
+
 	return &Controller{
 		commandRecorder: cmdr,
 		eventRecorder:   ever,
 		dataRecorder:    datar,
 		eventsQueue:     eq,
 		statusQueue:     sq,
+		timer:           t,
+		ift:             ttt,
 	}, nil
 }
 
@@ -87,6 +99,13 @@ func (c *Controller) OnStatus(args rpcs.ArgsOnStatus, reply *rpcs.ReplyOnStatus)
 }
 
 func (c *Controller) OnEvent(args rpcs.ArgsOnEvent, reply *rpcs.ReplyOnEvent) error {
+	go func() {
+		err := c.ift.Check(args.DeviceId, args.No)
+		if err != nil {
+			server.Log.Warnf("perform ifttt rules error : %v", err)
+		}
+	}()
+
 	err := c.eventRecorder.Insert(args)
 	if err != nil {
 		return err

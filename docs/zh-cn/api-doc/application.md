@@ -269,14 +269,14 @@ App-Key: 4d3e3e2e4d3e3e2e4d3e3e2e4d3e3e2e...
 ##### type
 可以指定规则的形式，type不同，其他参数格式也会有所区别。目前支持`timer`和`ifttt`两种：
 
-* `timmer`： 可以通过计划任务的方式设定指定时间循环执行某任务
+* `timer`： 可以通过计划任务的方式设定指定时间循环执行某任务
 * `ifttt`: 可以设置自动联动，某个设备的状态变化可以触发向其他设备发送指令或设置状态等。
 
 ##### trigger
 在何种情况触发该规则。
 
 * `type==timer`: 符合[crontab](https://zh.wikipedia.org/wiki/Cron)格式，如`0 0 * * *`表示每天0点触发，详细参考[crontab时间设置](https://zh.wikipedia.org/wiki/Cron#.E6.97.B6.E9.97.B4.E8.AE.BE.E7.BD.AE)。
-* `type==ifttt`: ifttt触发条件，如`status[name][1] > 100`
+* `type==ifttt`: ifttt触发条件，设备发生的事件名称，如`open`
 
 ##### target
 以`/`分割的URI地址，如`device/{identifer}/command`或`device/{identifier}/status`，格式类似URL（但不完全相同，请注意区分，第一位没有`/`,`device`和`command`为单数形式）
