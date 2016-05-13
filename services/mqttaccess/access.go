@@ -48,7 +48,7 @@ func (a *Access) GetStatus(args rpcs.ArgsGetStatus, reply *rpcs.ReplyGetStatus) 
 	// first send a get status command
 	cmdArgs := rpcs.ArgsSendCommand{
 		DeviceId:  args.Id,
-		SubDevice: 0,
+		SubDevice: 65535,
 		No:        commandGetCurrentStatus,
 		Priority:  99,
 		WaitTime:  0,

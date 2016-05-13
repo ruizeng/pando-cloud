@@ -15,7 +15,6 @@ type Timer struct {
 
 func NewTimer() *Timer {
 	t := &Timer{}
-	t.refresh()
 
 	return t
 }
@@ -30,6 +29,9 @@ func (t *Timer) createTimerFunc(target string, action string) func() {
 }
 
 func (t *Timer) refresh() {
+	if t.c != nil {
+		t.c.Stop()
+	}
 	t.c = cron.New()
 	timers := &[]models.Rule{}
 	query := &models.Rule{
@@ -46,10 +48,11 @@ func (t *Timer) refresh() {
 	for _, one := range *timers {
 		t.c.AddFunc(sec+one.Trigger, t.createTimerFunc(one.Target, one.Action))
 	}
+
+	t.c.Start()
 }
 
 func (t *Timer) Run() {
-	t.c.Start()
 	go func() {
 		for {
 			t.refresh()
