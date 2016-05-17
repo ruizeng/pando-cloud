@@ -80,9 +80,6 @@ func (mgr *Manager) SetHeartbeat(id uint64) error {
 		return err
 	}
 
-	if err != nil {
-		return nil
-	}
 	if status == nil {
 		return errors.New("device offline.")
 	}

@@ -190,12 +190,6 @@ func (c *Connection) RcvMsgFromClient() {
 				AccessRPCHost:     server.GetRPCHost(),
 				HeartbeatInterval: uint32(c.KeepAlive),
 			}
-			err = c.Mgr.Provider.OnDeviceOnline(args)
-			if err != nil {
-				server.Log.Warn("device online error : %v", err)
-				c.Close()
-				return
-			}
 
 			c.Mgr.AddConn(c.DeviceId, c)
 			connack := &ConnAck{
@@ -204,7 +198,15 @@ func (c *Connection) RcvMsgFromClient() {
 
 			c.Submit(connack)
 			c.KeepAlive = msg.KeepAliveTimer
-			server.Log.Infof("%s, connected to server now", host)
+
+			err = c.Mgr.Provider.OnDeviceOnline(args)
+			if err != nil {
+				server.Log.Warn("device online error : %v", err)
+				c.Close()
+				return
+			}
+
+			server.Log.Infof("device %d, connected to server now, host: %s", c.DeviceId, host)
 
 		case *Publish:
 			server.Log.Infof("%s, publish topic: %s", host, msg.TopicName)

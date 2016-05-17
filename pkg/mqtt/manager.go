@@ -93,6 +93,7 @@ func (m *Manager) CleanWorker() {
 			if uint16(curTime-con.LastHbTime) > uint16(3*con.KeepAlive/2) {
 				server.Log.Infof("connection %v inactive , removing", con)
 				con.Close()
+				delete(m.IdToConn, con.DeviceId)
 			}
 		}
 
