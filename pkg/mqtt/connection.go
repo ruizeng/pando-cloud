@@ -113,12 +113,13 @@ func (c *Connection) Close() {
 	server.Log.Infof("closing connection of device %v", deviceid)
 	if c.Conn != nil {
 		c.Conn.Close()
+		c.Conn = nil
+		c.Mgr.Provider.OnDeviceOffline(deviceid)
 	}
 	if c.SendChan != nil {
 		close(c.SendChan)
 		c.SendChan = nil
 	}
-	c.Mgr.Provider.OnDeviceOffline(deviceid)
 }
 
 func (c *Connection) RcvMsgFromClient() {
