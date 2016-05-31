@@ -90,6 +90,7 @@ func (a *Access) SendCommand(args rpcs.ArgsSendCommand, reply *rpcs.ReplySendCom
 	cmd.Head.No = args.No
 	cmd.Head.Priority = args.Priority
 	cmd.Head.SubDeviceid = args.SubDevice
+	cmd.Head.ParamsCount = uint16(len(args.Params))
 	cmd.Params = args.Params
 	msg, err := cmd.Marshal()
 	if err != nil {
