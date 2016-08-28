@@ -186,7 +186,7 @@ func testDevice(t *testing.T, r *Registry) {
 	if err != nil {
 		t.Error(err)
 	}
-	
+
 	devRow := &models.Device{}
 	err = r.FindDeviceByIdentifier(device.DeviceIdentifier, devRow)
 	if err != nil {

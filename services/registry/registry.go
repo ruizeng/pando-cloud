@@ -44,6 +44,7 @@ func setProduct(target *models.Product, src *models.Product) {
 	target.ProductDescription = src.ProductDescription
 	target.ProductKey = src.ProductKey
 	target.ProductConfig = src.ProductConfig
+	target.VendorID = src.VendorID
 	target.CreatedAt = src.CreatedAt
 	target.UpdatedAt = src.UpdatedAt
 }

@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	flagCacheSize = "cacheSize"
+	flagCacheSize    = "cacheSize"
 	defaultCacheSize = 102400
 )
 
@@ -16,8 +16,8 @@ var (
 
 var MemCache cache.Cache
 
-func getCache() (cache.Cache) {
-	if MemCache == nil{
+func getCache() cache.Cache {
+	if MemCache == nil {
 		MemCache = cache.NewMemCache(*confCacheSize)
 	}
 	return MemCache
