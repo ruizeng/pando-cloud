@@ -1,19 +1,8 @@
-# pando-cloud  [![Build Status](https://travis-ci.org/PandoCloud/pando-cloud.svg)](https://travis-ci.org/PandoCloud/pando-cloud)  [![Coverage Status](https://coveralls.io/repos/PandoCloud/pando-cloud/badge.svg?branch=master&service=github)](https://coveralls.io/github/PandoCloud/pando-cloud?branch=master) 
+# pando-cloud  [![Build Status](https://travis-ci.org/ruizeng/pando-cloud.svg)](https://travis-ci.org/ruizeng/pando-cloud)  [![Coverage Status](https://coveralls.io/repos/ruizeng/pando-cloud/badge.svg?branch=master&service=github)](https://coveralls.io/github/ruizeng/pando-cloud?branch=master) 
 
-PandoCloud是Pando物联网解决方案的云平台部分。
+PandoCloud是一个开源的物联网云平台。
 
 [English Document](docs/en/README.md)
-
-## 什么是Pando？
-
-Pando是一套完全开源的物联网解决方案。致力于帮助开发者快速创建自己的物联网应用。它包含了如下的工具，协议和类库：
-
-* Pando Cloud
-* [Pando Embeded Framework](https://github.com/PandoCloud/pando-embeded-framework)
-* [Pando Protocol](https://github.com/PandoCloud/pando-protocol)
-* Mobile SDK for [Android](https://github.com/PandoCloud/pando-android-sdk) and [IOS](https://github.com/PandoCloud/pando-ios-sdk)
-* IoT Explorer APP FreeIOT for [Android](https://github.com/PandoCloud/freeiot-android) and [IOS](https://github.com/PandoCloud/freeiot-ios)
-* IoT Kit [Tisan](https://github.com/tisan-kit)
 
 ## 设计理念
 
